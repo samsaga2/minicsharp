@@ -52,10 +52,19 @@ and check_exp venv tenv exp pos =
      T.Nil
   | A.IntExp (_,_) ->
      T.Int
-  | A.VarExp (_,_) ->
-     (* TODO *)
-     T.Int
-  | A.CallExp (_,_,_) ->
+  | A.VarExp (sym,pos) ->
+     begin
+       match S.get venv sym with
+       | None ->
+          error ("Undeclared variable: "^(Symbol.name sym)) pos;
+          T.Nil
+       | Some(E.FunEntry _) ->
+          error ("Variable expected: "^(Symbol.name sym)) pos;
+          T.Nil
+       | Some(E.VarEntry typ) ->
+          typ
+     end
+    | A.CallExp (_,_,_) ->
      (* TODO *)
      T.Int
   | A.OpExp (_,_,_,_) ->
