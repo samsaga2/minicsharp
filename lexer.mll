@@ -9,6 +9,12 @@
                                   Lexing.pos_lnum = pos.Lexing.pos_lnum + 1;
                                   Lexing.pos_bol = pos.Lexing.pos_cnum;
                                 }
+
+  let line pos =
+    pos.Lexing.pos_lnum
+
+  let col pos =
+    pos.Lexing.pos_cnum - pos.Lexing.pos_bol
 }
 
 let newline = ('\010' | '\013' | "\013\010")
