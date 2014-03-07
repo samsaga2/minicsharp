@@ -6,7 +6,10 @@
 %token <string> ID
 %token EOF PLUS MINUS MUL DIV
 %token LPAREN RPAREN COMMA SEMICOLON LBRACK RBRACK RETURN EQ
+%token IF ELSE
 
+%nonassoc IFX
+%nonassoc ELSE
 %left PLUS MINUS
 %left MUL DIV
 %nonassoc UMINUS
@@ -24,7 +27,7 @@ decl:
   | var_decl { $1 }
 
 fun_decl:
-  | t=id n=id LPAREN a=fun_args RPAREN LBRACK b=body RBRACK
+  | t=id n=id LPAREN a=fun_args RPAREN b=body
         { FunDec (n,t,a,b,$startpos) }
 
 fun_args:
@@ -35,7 +38,8 @@ fun_arg:
   | t=id n=id { (n,t) }
 
 body:
-  | l=list(stmt) { l }
+  | LBRACK l=list(stmt) RBRACK
+        { SeqStmt (l,$startpos) }
 
 var_decl:
   | t=id n=id SEMICOLON
@@ -50,6 +54,12 @@ stmt:
         { ReturnStmt (NilExp ($startpos),$startpos) }
   | RETURN e=exp SEMICOLON
         { ReturnStmt (e,$startpos) }
+  | body
+        { $1 }
+  | IF LPAREN e=exp RPAREN b=stmt %prec IFX
+        { IfStmt (e,b,$startpos) }
+  | IF LPAREN e=exp RPAREN b=stmt ELSE l=stmt
+        { IfElseStmt (e,b,l,$startpos) }
 
 exp:
   | INT

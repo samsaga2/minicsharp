@@ -32,6 +32,8 @@ rule token = parse
           | "}" { RBRACK }
           | "=" { EQ }
           | "return" { RETURN }
+          | "if" { IF }
+          | "else" { ELSE }
           | alpha (alpha|digit|"_")* as v { ID v }
           | digit+ as i { INT (int_of_string i) }
           | _ { raise LexingError }
