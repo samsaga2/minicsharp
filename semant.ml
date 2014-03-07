@@ -28,7 +28,7 @@ and check_fundec venv tenv name ret_typ args body pos =
   let typ = actual_type tenv ret_typ pos in
   let entry = E.FunEntry (arg_types, typ) in
   let venv' = S.put venv name entry in
-  (venv', tenv, T.Unit)
+  check_stmt venv' tenv body
 
 and check_vardec venv tenv name typ init pos =
   assert_dup venv name pos;
@@ -61,6 +61,32 @@ and check_exp venv tenv exp pos =
   | A.OpExp (_,_,_,_) ->
      (* TODO *)
      T.Int
+
+and check_stmt venv tenv stmt =
+  match stmt with
+  | A.DeclStmt (decl,pos) ->
+     check_decl venv tenv decl
+  | A.ReturnStmt (exp,pos) ->
+     (* TODO check exp type is = func return type *)
+     ignore (check_exp venv tenv exp pos);
+     (venv,tenv,T.Unit)
+  | A.SeqStmt (stmts,pos) ->
+     ignore (List.fold_left
+               (fun (venv',tenv',typ) stmt -> check_stmt venv' tenv' stmt)
+               (venv,tenv,T.Unit)
+               stmts);
+     (venv,tenv,T.Unit)
+  | A.IfStmt (cond,then_body,pos) ->
+     let cond_typ = check_exp venv tenv cond pos in
+     assert_type cond_typ T.Int pos; (* TODO boolean *)
+     ignore (check_stmt venv tenv then_body);
+     (venv,tenv,T.Nil)
+  | A.IfElseStmt (cond,then_body,else_body,pos) ->
+     let cond_typ = check_exp venv tenv cond pos in
+     assert_type cond_typ T.Int pos; (* TODO boolean *)
+     ignore (check_stmt venv tenv then_body);
+     ignore (check_stmt venv tenv else_body);
+     (venv,tenv,T.Nil)
 
 and actual_type tenv sym pos =
   match S.get tenv sym with
