@@ -3,31 +3,31 @@ module E = Env
 module S = Symbol
 module T = Types
 
-let rec translate prog =
-  translate_prog E.base_venv E.base_tenv prog
+let rec check prog =
+  check_prog E.base_venv E.base_tenv prog
 
-and translate_prog venv tenv prog =
+and check_prog venv tenv prog =
   match prog with
   | [] -> (venv, tenv, T.Unit)
   | decl::tail ->
-     let (venv',tenv',typ)=translate_decl venv tenv decl in
-     translate_prog venv' tenv' tail
+     let (venv',tenv',typ)=check_decl venv tenv decl in
+     check_prog venv' tenv' tail
 
-and translate_decl venv tenv decl =
+and check_decl venv tenv decl =
   match decl with
   | A.FunDec (name,typ,args,body,pos) ->
-     translate_fundec venv tenv name typ args body pos
+     check_fundec venv tenv name typ args body pos
   | A.VarDec (name,typ,init,pos) ->
-     translate_vardec venv tenv name typ init pos
+     check_vardec venv tenv name typ init pos
 
-and translate_fundec venv tenv name ret_typ args body pos =
+and check_fundec venv tenv name ret_typ args body pos =
   let arg_types = List.map (fun (_, arg_typ) -> actual_type tenv arg_typ pos) args in
   let typ = actual_type tenv ret_typ pos in
   let fun_entry = E.FunEntry (arg_types, typ) in
   let venv' = S.put venv name fun_entry in
   (venv', tenv, T.Unit)
 
-and translate_vardec venv tenv name typ init pos =
+and check_vardec venv tenv name typ init pos =
   (* TODO *)
   (venv, tenv, T.Unit)
 
