@@ -70,16 +70,30 @@ and check_exp ctx exp pos =
        match S.get ctx.venv sym with
        | None ->
           error ("undeclared variable: "^(Symbol.name sym)) pos;
-          T.Nil
+          T.Unit
        | Some(E.FunEntry _) ->
           error ("variable expected: "^(Symbol.name sym)) pos;
-          T.Nil
+          T.Unit
        | Some(E.VarEntry typ) ->
           typ
      end
-    | A.CallExp (_,_,_) ->
-     (* TODO *)
-     T.Int
+  | A.CallExp (sym,args,pos) ->
+     begin
+       match S.get ctx.venv sym with
+       | None ->
+          error ("undeclared function: "^(Symbol.name sym)) pos;
+          T.Unit
+       | Some(E.VarEntry _) ->
+          error ("function expected: "^(Symbol.name sym)) pos;
+          T.Unit
+       | Some(E.FunEntry (arg_types,ret_type)) ->
+          List.iter2
+            (fun exp decl_arg_typ ->
+             let exp_typ = check_exp ctx exp pos in
+             assert_type exp_typ decl_arg_typ pos)
+            args arg_types;
+          ret_type
+     end
   | A.OpExp (left,op,right,pos) ->
      let left = check_exp ctx left pos
      and right = check_exp ctx right pos in
