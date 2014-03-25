@@ -3,56 +3,62 @@ module E = Env
 module S = Symbol
 module T = Types
 
-let rec check prog =
-  check_prog E.base_venv E.base_tenv prog
+type context = {venv:E.ventry Symbol.table;
+                tenv:Types.t Symbol.table}
 
-and check_prog venv tenv prog =
+let rec check prog =
+  let ctx = {venv=E.base_venv;tenv=E.base_tenv} in
+  check_prog ctx prog
+
+and check_prog ctx prog =
   match prog with
   | [] -> ()
   | decl::tail ->
-     let (venv',tenv',typ) = check_decl venv tenv decl in
-     check_prog venv' tenv' tail
+     let (ctx',typ) = check_decl ctx decl in
+     check_prog ctx' tail
 
-and check_decl venv tenv decl =
+and check_decl ctx decl =
   match decl with
   | A.FunDec (name,typ,args,body,pos) ->
-     check_fundec venv tenv name typ args body pos
+     check_fundec ctx name typ args body pos
   | A.VarDec (name,typ,init,pos) ->
-     check_vardec venv tenv name typ init pos
+     check_vardec ctx name typ init pos
 
-and check_fundec venv tenv name ret_typ args body pos =
-  assert_unique venv name pos;
+and check_fundec ctx name ret_typ args body pos =
+  assert_unique ctx.venv name pos;
   let arg_types = List.map
-                    (fun (_,arg_typ) -> actual_type tenv arg_typ pos)
+                    (fun (_,arg_typ) -> actual_type ctx.tenv arg_typ pos)
                     args in
-  let ret_typ = actual_type tenv ret_typ pos in
+  let ret_typ = actual_type ctx.tenv ret_typ pos in
   let entry = E.FunEntry (arg_types, ret_typ) in
   let venv' = List.fold_left
                 (fun venv (arg_sym,arg_typ) ->
-                 let typ = actual_type tenv arg_typ pos in
+                 let typ = actual_type ctx.tenv arg_typ pos in
                  let entry = E.VarEntry typ in
                  S.put venv arg_sym entry)
-                (S.put venv name entry)
+                (S.put ctx.venv name entry)
                 args in
-  check_stmt venv' tenv body
+  let ctx' = {venv=venv';tenv=ctx.tenv} in
+  check_stmt ctx' body
 
-and check_vardec venv tenv name typ init pos =
-  assert_unique venv name pos;
-  let typ = actual_type tenv typ pos in
+and check_vardec ctx name typ init pos =
+  assert_unique ctx.venv name pos;
+  let typ = actual_type ctx.tenv typ pos in
   begin
     match init with
     | None -> ()
     | Some(init) ->
        begin
-         let exp_type = check_exp venv tenv init pos in
+         let exp_type = check_exp ctx init pos in
          assert_type typ exp_type pos;
        end
   end;
   let entry = E.VarEntry typ in
-  let venv' = S.put venv name entry in
-  (venv', tenv, T.Unit)
+  let venv' = S.put ctx.venv name entry in
+  let ctx' = {venv=venv';tenv=ctx.tenv} in
+  (ctx', T.Unit)
 
-and check_exp venv tenv exp pos =
+and check_exp ctx exp pos =
   match exp with
   | A.NilExp (_) ->
      T.Nil
@@ -60,7 +66,7 @@ and check_exp venv tenv exp pos =
      T.Int
   | A.VarExp (sym,pos) ->
      begin
-       match S.get venv sym with
+       match S.get ctx.venv sym with
        | None ->
           error ("undeclared variable: "^(Symbol.name sym)) pos;
           T.Nil
@@ -74,41 +80,41 @@ and check_exp venv tenv exp pos =
      (* TODO *)
      T.Int
   | A.OpExp (left,op,right,pos) ->
-     let left = check_exp venv tenv left pos
-     and right = check_exp venv tenv right pos in
+     let left = check_exp ctx left pos
+     and right = check_exp ctx right pos in
      assert_type left right pos;
      assert_number left pos;
      left
 
-and check_stmt venv tenv stmt =
+and check_stmt ctx stmt =
   match stmt with
   | A.DeclStmt (decl,pos) ->
-     check_decl venv tenv decl
+     check_decl ctx decl
   | A.ReturnStmt (exp,pos) ->
      (* TODO check exp type is = func return type *)
-     ignore (check_exp venv tenv exp pos);
-     (venv,tenv,T.Unit)
+     ignore (check_exp ctx exp pos);
+     (ctx,T.Unit)
   | A.SeqStmt (stmts,pos) ->
      ignore (List.fold_left
-               (fun (venv',tenv',typ) stmt -> check_stmt venv' tenv' stmt)
-               (venv,tenv,T.Unit)
+               (fun (ctx',typ) stmt -> check_stmt ctx' stmt)
+               (ctx,T.Unit)
                stmts);
-     (venv,tenv,T.Unit)
+     (ctx,T.Unit)
   | A.IfStmt (cond,then_body,pos) ->
-     let cond_typ = check_exp venv tenv cond pos in
+     let cond_typ = check_exp ctx cond pos in
      assert_type cond_typ T.Bool pos;
-     ignore (check_stmt venv tenv then_body);
-     (venv,tenv,T.Unit)
+     ignore (check_stmt ctx then_body);
+     (ctx,T.Unit)
   | A.IfElseStmt (cond,then_body,else_body,pos) ->
-     let cond_typ = check_exp venv tenv cond pos in
+     let cond_typ = check_exp ctx cond pos in
      assert_type cond_typ T.Bool pos;
-     ignore (check_stmt venv tenv then_body);
-     ignore (check_stmt venv tenv else_body);
-     (venv,tenv,T.Unit)
+     ignore (check_stmt ctx then_body);
+     ignore (check_stmt ctx else_body);
+     (ctx,T.Unit)
   | A.IgnoreStmt (exp,pos) ->
-     let exp_typ = check_exp venv tenv exp pos in
+     let exp_typ = check_exp ctx exp pos in
      ignore exp_typ;
-     (venv,tenv,T.Unit)
+     (ctx,T.Unit)
 
 and actual_type tenv sym pos =
   match S.get tenv sym with
