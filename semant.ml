@@ -9,12 +9,12 @@ type context = {venv:E.ventry Symbol.table;
 
 let rec check prog =
   let ctx = {venv=E.base_venv;tenv=E.base_tenv;rettype=T.Unit} in
-  check_prog ctx prog;
-  prog
+  let ctx' = check_prog ctx prog in
+  (ctx'.venv,ctx'.tenv)
 
 and check_prog ctx prog =
   match prog with
-  | [] -> ()
+  | [] -> ctx
   | decl::tail ->
      let (ctx',typ) = check_decl ctx decl in
      check_prog ctx' tail

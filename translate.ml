@@ -1,10 +1,13 @@
+module E = Env
 module A = Ast
 module I = Ir
 
-type context = {code:I.inst list}
+type context = {venv:E.ventry Symbol.table;
+                tenv:Types.t Symbol.table;
+                code:I.inst list}
 
-let rec trans prog =
-  let ctx = {code=[]} in
+let rec trans venv tenv prog =
+  let ctx = {venv=venv;tenv=tenv;code=[]} in
   let ctx' = trans_prog ctx prog in
   ctx'.code
 
@@ -25,9 +28,9 @@ and trans_decl ctx decl =
 and trans_fundec ctx name typ args body pos =
   (* TODO *)
   let new_code = [I.Nop] in
-  {code=ctx.code@new_code}
+  {ctx with code=ctx.code@new_code}
 
 and trans_vardec ctx name typ init pos =
   (* TODO *)
   let new_code = [I.Nop] in
-  {code=ctx.code@new_code}
+  {ctx with code=ctx.code@new_code}
