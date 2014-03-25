@@ -9,8 +9,8 @@ let compile in_buffer =
   try
     let prog = Parser.program Lexer.token lexbuf in
     let (venv,tenv) = Semant.check prog in
-    let ir = Translate.trans venv tenv prog in
-    ignore ir
+    let code = Translate.trans venv tenv prog in
+    print_endline (Ir.print_code code)
   with
   | Lexer.LexingError ->
      print_syntax_error lexbuf
