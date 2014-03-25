@@ -12,6 +12,7 @@ type prog = decl list
    | SeqStmt of stmt list * pos
    | IfStmt of exp * stmt * pos
    | IfElseStmt of exp * stmt * stmt * pos
+   | IgnoreStmt of exp * pos
  and exp =
    | NilExp of pos
    | IntExp of int * pos

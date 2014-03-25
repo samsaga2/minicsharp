@@ -89,13 +89,17 @@ and check_stmt venv tenv stmt =
      let cond_typ = check_exp venv tenv cond pos in
      assert_type cond_typ T.Int pos; (* TODO boolean *)
      ignore (check_stmt venv tenv then_body);
-     (venv,tenv,T.Nil)
+     (venv,tenv,T.Unit)
   | A.IfElseStmt (cond,then_body,else_body,pos) ->
      let cond_typ = check_exp venv tenv cond pos in
      assert_type cond_typ T.Int pos; (* TODO boolean *)
      ignore (check_stmt venv tenv then_body);
      ignore (check_stmt venv tenv else_body);
-     (venv,tenv,T.Nil)
+     (venv,tenv,T.Unit)
+  | A.IgnoreStmt (exp,pos) ->
+     let exp_typ = check_exp venv tenv exp pos in
+     ignore exp_typ;
+     (venv,tenv,T.Unit)
 
 and actual_type tenv sym pos =
   match S.get tenv sym with

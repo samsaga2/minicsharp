@@ -56,6 +56,8 @@ stmt:
         { ReturnStmt (e,$startpos) }
   | body
         { $1 }
+  | e=exp SEMICOLON
+        { IgnoreStmt (e,$startpos) }
   | IF LPAREN e=exp RPAREN b=stmt %prec IFX
         { IfStmt (e,b,$startpos) }
   | IF LPAREN e=exp RPAREN b=stmt ELSE l=stmt
@@ -74,7 +76,11 @@ exp:
        { NilExp ($startpos) }
   | LPAREN e=exp RPAREN
        { e }
-  | i=id LPAREN l=separated_list(COMMA, exp) RPAREN
+  | call
+       { $1 }
+
+call:
+  | i=id LPAREN l=separated_list(COMMA,exp) RPAREN
        { CallExp (i,l,$startpos) }
 
 id:
