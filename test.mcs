@@ -1,5 +1,5 @@
 void test(int i, int j) {
-     int a = i + j * 2 + i;
+     int a = i + j * 2 + i ^ 2;
      return a;
 }
 

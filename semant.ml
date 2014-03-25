@@ -8,9 +8,9 @@ let rec check prog =
 
 and check_prog venv tenv prog =
   match prog with
-  | [] -> (venv, tenv, T.Unit)
+  | [] -> ()
   | decl::tail ->
-     let (venv',tenv',typ)=check_decl venv tenv decl in
+     let (venv',tenv',typ) = check_decl venv tenv decl in
      check_prog venv' tenv' tail
 
 and check_decl venv tenv decl =
