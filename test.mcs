@@ -2,3 +2,7 @@ void test(int i, int j) {
      int a = i + j * 2 + i;
      return a;
 }
+
+void test2() {
+     test(10,20);
+}
