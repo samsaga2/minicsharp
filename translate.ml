@@ -26,8 +26,11 @@ and trans_decl ctx decl =
      trans_vardec ctx name typ init pos
 
 and trans_fundec ctx name typ args body pos =
+  let func_label = Temp.new_label () in
+  let new_code = [I.Comment (Symbol.name name);
+                  I.Label func_label;
+                  I.Ret] in
   (* TODO *)
-  let new_code = [I.Ret] in
   {ctx with code=ctx.code@new_code}
 
 and trans_vardec ctx name typ init pos =
