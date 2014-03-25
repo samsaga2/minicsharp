@@ -4,10 +4,11 @@ module S = Symbol
 module T = Types
 
 type context = {venv:E.ventry Symbol.table;
-                tenv:Types.t Symbol.table}
+                tenv:Types.t Symbol.table;
+                rettype:Types.t}
 
 let rec check prog =
-  let ctx = {venv=E.base_venv;tenv=E.base_tenv} in
+  let ctx = {venv=E.base_venv;tenv=E.base_tenv;rettype=T.Unit} in
   check_prog ctx prog
 
 and check_prog ctx prog =
@@ -38,7 +39,7 @@ and check_fundec ctx name ret_typ args body pos =
                  S.put venv arg_sym entry)
                 (S.put ctx.venv name entry)
                 args in
-  let ctx' = {venv=venv';tenv=ctx.tenv} in
+  let ctx' = {ctx with venv=venv';rettype=ret_typ} in
   check_stmt ctx' body
 
 and check_vardec ctx name typ init pos =
@@ -55,7 +56,7 @@ and check_vardec ctx name typ init pos =
   end;
   let entry = E.VarEntry typ in
   let venv' = S.put ctx.venv name entry in
-  let ctx' = {venv=venv';tenv=ctx.tenv} in
+  let ctx' = {ctx with venv=venv'} in
   (ctx', T.Unit)
 
 and check_exp ctx exp pos =
@@ -91,8 +92,8 @@ and check_stmt ctx stmt =
   | A.DeclStmt (decl,pos) ->
      check_decl ctx decl
   | A.ReturnStmt (exp,pos) ->
-     (* TODO check exp type is = func return type *)
-     ignore (check_exp ctx exp pos);
+     let ret_typ = check_exp ctx exp pos in
+     assert_type ret_typ ctx.rettype pos;
      (ctx,T.Unit)
   | A.SeqStmt (stmts,pos) ->
      ignore (List.fold_left
