@@ -27,7 +27,7 @@ and trans_decl ctx decl =
 
 and trans_fundec ctx name typ args body pos =
   (* TODO *)
-  let new_code = [I.Nop] in
+  let new_code = [I.Ret] in
   {ctx with code=ctx.code@new_code}
 
 and trans_vardec ctx name typ init pos =
