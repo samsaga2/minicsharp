@@ -96,12 +96,12 @@ and check_stmt venv tenv stmt =
      (venv,tenv,T.Unit)
   | A.IfStmt (cond,then_body,pos) ->
      let cond_typ = check_exp venv tenv cond pos in
-     assert_type cond_typ T.Int pos; (* TODO boolean *)
+     assert_type cond_typ T.Bool pos;
      ignore (check_stmt venv tenv then_body);
      (venv,tenv,T.Unit)
   | A.IfElseStmt (cond,then_body,else_body,pos) ->
      let cond_typ = check_exp venv tenv cond pos in
-     assert_type cond_typ T.Int pos; (* TODO boolean *)
+     assert_type cond_typ T.Bool pos;
      ignore (check_stmt venv tenv then_body);
      ignore (check_stmt venv tenv else_body);
      (venv,tenv,T.Unit)
@@ -120,6 +120,7 @@ and actual_type tenv sym pos =
      | T.Unit -> T.Unit
      | T.Nil -> T.Nil
      | T.Int -> T.Int
+     | T.Bool -> T.Bool
 
 and error msg pos =
   let line = Lexer.line pos
@@ -141,5 +142,5 @@ and assert_number typ pos =
   match typ with
   | T.Int ->
      ()
-  | T.Unit | T.Nil ->
+  | T.Unit | T.Nil | T.Bool ->
      error "must be a number" pos

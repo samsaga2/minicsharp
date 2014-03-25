@@ -13,7 +13,8 @@ let base_tenv : Types.t Symbol.table =
     (fun symtable (sym, ty) -> Symbol.put symtable sym ty)
     Symbol.empty
     [Symbol.symbol "int", Types.Int;
-     Symbol.symbol "void", Types.Unit]
+     Symbol.symbol "void", Types.Unit;
+     Symbol.symbol "bool", Types.Bool]
 
 let base_venv =
   Symbol.empty
