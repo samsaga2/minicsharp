@@ -34,12 +34,14 @@ and trans_decl ctx decl =
 
 and trans_fundec ctx name typ args body pos =
   let func_label = Temp.new_label () in
-  let ctx' = {ctx with nenv=(S.put ctx.nenv name func_label)} in
-  let new_code = [I.Comment (S.name name);
-                  I.Label func_label;
-                  I.Ret] in
-  (* TODO *)
-  {ctx' with code=ctx'.code@new_code}
+  let header_code = [I.Comment (S.name name);
+                     I.Label func_label]
+  and footer_code = [I.Ret] in
+  (* TODO args *)
+  (* TODO body *)
+  let code = header_code@footer_code in
+  {ctx with nenv=(S.put ctx.nenv name func_label);
+            code=ctx.code@code}
 
 and trans_vardec ctx name typ init pos =
   (* TODO *)
