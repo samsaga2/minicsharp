@@ -21,7 +21,7 @@ and check_decl venv tenv decl =
      check_vardec venv tenv name typ init pos
 
 and check_fundec venv tenv name ret_typ args body pos =
-  assert_dup venv name pos;
+  assert_unique venv name pos;
   let arg_types = List.map
                     (fun (_, arg_typ) -> actual_type tenv arg_typ pos)
                     args in
@@ -31,7 +31,7 @@ and check_fundec venv tenv name ret_typ args body pos =
   check_stmt venv' tenv body
 
 and check_vardec venv tenv name typ init pos =
-  assert_dup venv name pos;
+  assert_unique venv name pos;
   let typ = actual_type tenv typ pos in
   begin
     match init with
@@ -121,7 +121,7 @@ and assert_type t1 t2 pos =
   if t1<>t2 then
     error "types does not match" pos
 
-and assert_dup env sym pos =
+and assert_unique env sym pos =
   match S.get env sym with
   | None -> ()
   | Some _ ->
