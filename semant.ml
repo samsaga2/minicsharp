@@ -23,12 +23,12 @@ and check_decl venv tenv decl =
 and check_fundec venv tenv name ret_typ args body pos =
   assert_unique venv name pos;
   let arg_types = List.map
-                    (fun (_, arg_typ) -> actual_type tenv arg_typ pos)
+                    (fun (_,arg_typ) -> actual_type tenv arg_typ pos)
                     args in
   let typ = actual_type tenv ret_typ pos in
   let entry = E.FunEntry (arg_types, typ) in
   let venv' = S.put venv name entry in
-  check_stmt venv' tenv body
+  check_stmt venv tenv body
 
 and check_vardec venv tenv name typ init pos =
   assert_unique venv name pos;
@@ -56,10 +56,10 @@ and check_exp venv tenv exp pos =
      begin
        match S.get venv sym with
        | None ->
-          error ("Undeclared variable: "^(Symbol.name sym)) pos;
+          error ("undeclared variable: "^(Symbol.name sym)) pos;
           T.Nil
        | Some(E.FunEntry _) ->
-          error ("Variable expected: "^(Symbol.name sym)) pos;
+          error ("variable expected: "^(Symbol.name sym)) pos;
           T.Nil
        | Some(E.VarEntry typ) ->
           typ
@@ -67,9 +67,12 @@ and check_exp venv tenv exp pos =
     | A.CallExp (_,_,_) ->
      (* TODO *)
      T.Int
-  | A.OpExp (_,_,_,_) ->
-     (* TODO *)
-     T.Int
+  | A.OpExp (left,op,right,pos) ->
+     let left = check_exp venv tenv left pos
+     and right = check_exp venv tenv right pos in
+     assert_type left right pos;
+     assert_number left pos;
+     left
 
 and check_stmt venv tenv stmt =
   match stmt with
@@ -115,7 +118,7 @@ and actual_type tenv sym pos =
 and error msg pos =
   let line = Lexer.line pos
   and col = Lexer.col pos in
-  Printf.printf "%d:%d: %s" line col msg
+  Printf.printf "%d:%d: %s\n%!" line col msg
 
 and assert_type t1 t2 pos =
   if t1<>t2 then
@@ -123,6 +126,14 @@ and assert_type t1 t2 pos =
 
 and assert_unique env sym pos =
   match S.get env sym with
-  | None -> ()
+  | None ->
+     ()
   | Some _ ->
-     error ("Already defined "^(S.name sym)) pos
+     error ("already defined "^(S.name sym)) pos
+
+and assert_number typ pos =
+  match typ with
+  | T.Int ->
+     ()
+  | T.Unit | T.Nil ->
+     error "must be a number" pos
