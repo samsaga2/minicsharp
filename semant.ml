@@ -9,7 +9,8 @@ type context = {venv:E.ventry Symbol.table;
 
 let rec check prog =
   let ctx = {venv=E.base_venv;tenv=E.base_tenv;rettype=T.Unit} in
-  check_prog ctx prog
+  check_prog ctx prog;
+  prog
 
 and check_prog ctx prog =
   match prog with

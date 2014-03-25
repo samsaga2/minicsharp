@@ -1,0 +1,2 @@
+type inst =
+  | Nop

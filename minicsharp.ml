@@ -8,7 +8,8 @@ let compile in_buffer =
   let lexbuf = Lexing.from_channel in_buffer in
   try
     let prog = Parser.program Lexer.token lexbuf in
-    Semant.check prog
+    let ir = Translate.trans (Semant.check prog) in
+    ignore ir
   with
   | Lexer.LexingError ->
      print_syntax_error lexbuf
