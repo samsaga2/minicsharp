@@ -25,10 +25,16 @@ and check_fundec venv tenv name ret_typ args body pos =
   let arg_types = List.map
                     (fun (_,arg_typ) -> actual_type tenv arg_typ pos)
                     args in
-  let typ = actual_type tenv ret_typ pos in
-  let entry = E.FunEntry (arg_types, typ) in
-  let venv' = S.put venv name entry in
-  check_stmt venv tenv body
+  let ret_typ = actual_type tenv ret_typ pos in
+  let entry = E.FunEntry (arg_types, ret_typ) in
+  let venv' = List.fold_left
+                (fun venv (arg_sym,arg_typ) ->
+                 let typ = actual_type tenv arg_typ pos in
+                 let entry = E.VarEntry typ in
+                 S.put venv arg_sym entry)
+                (S.put venv name entry)
+                args in
+  check_stmt venv' tenv body
 
 and check_vardec venv tenv name typ init pos =
   assert_unique venv name pos;
