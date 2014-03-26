@@ -31,8 +31,10 @@ and check_fundec ctx name ret_typ args body pos =
   let arg_types = List.map
                     (fun (_,arg_typ) -> actual_type ctx.tenv arg_typ pos)
                     args in
-  let ret_typ = actual_type ctx.tenv ret_typ pos in
-  let entry = E.FunEntry {E.args=arg_types; E.rettype=ret_typ} in
+  let rettype = actual_type ctx.tenv ret_typ pos in
+  let entry = E.FunEntry {E.label=Temp.new_label();
+                          E.args=arg_types;
+                          E.rettype=rettype} in
   let venv' = List.fold_left
                 (fun venv (arg_sym,arg_typ) ->
                  let typ = actual_type ctx.tenv arg_typ pos in
@@ -40,7 +42,7 @@ and check_fundec ctx name ret_typ args body pos =
                  S.put venv arg_sym entry)
                 (S.put ctx.venv name entry)
                 args in
-  let ctx' = {ctx with venv=venv';rettype=ret_typ} in
+  let ctx' = {ctx with venv=venv';rettype=rettype} in
   check_stmt ctx' body
 
 and check_vardec ctx name typ init pos =
