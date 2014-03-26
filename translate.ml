@@ -6,13 +6,11 @@ module T = Types
 
 type context = {venv:E.ventry S.table;
                 tenv:T.t S.table;
-                nenv:S.symbol S.table;
                 code:I.inst list}
 
 let rec trans venv tenv prog =
   let ctx = {venv=venv;
              tenv=tenv;
-             nenv=S.empty;
              code=[]} in
   let ctx' = trans_prog ctx prog in
   ctx'.code
@@ -40,8 +38,7 @@ and trans_fundec ctx name typ args body pos =
   (* TODO args *)
   (* TODO body *)
   let code = header_code@footer_code in
-  {ctx with nenv=(S.put ctx.nenv name func_label);
-            code=ctx.code@code}
+  {ctx with code=ctx.code@code}
 
 and trans_vardec ctx name typ init pos =
   (* TODO *)
