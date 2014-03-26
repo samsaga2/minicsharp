@@ -86,11 +86,7 @@ and check_exp ctx exp pos =
   | A.CallExp (sym,args,pos) ->
      check_callexp ctx sym args pos
   | A.OpExp (left,op,right,pos) ->
-     let left = check_exp ctx left pos
-     and right = check_exp ctx right pos in
-     assert_type left right pos;
-     assert_number left pos;
-     left
+     check_opexp ctx left op right pos
 
 and check_varexp ctx sym pos =
   match S.get ctx.venv sym with
@@ -118,6 +114,13 @@ and check_callexp ctx sym args pos =
         assert_type exp_typ decl_arg_typ pos)
        args funentry.E.args;
      funentry.E.rettype
+
+and check_opexp ctx left op right pos =
+  let left = check_exp ctx left pos
+  and right = check_exp ctx right pos in
+  assert_type left right pos;
+  assert_number left pos;
+  left
 
 and check_stmt ctx stmt =
   match stmt with
