@@ -149,7 +149,7 @@ and check_stmt venv tenv func stmt =
   | A.IgnoreStmt (exp,pos) ->
      let (insts,exp_typ) = check_exp venv tenv exp pos in
      ignore exp_typ;
-     ([],venv,tenv) (* TODO *)
+     (insts,venv,tenv)
 
 and check_letstmt venv tenv name typ init pos =
   assert_unique venv name pos;
