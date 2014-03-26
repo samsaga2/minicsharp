@@ -5,10 +5,10 @@ module T = Types
 
 type context = {venv:E.ventry Symbol.table;
                 tenv:Types.t Symbol.table;
-                rettype:Types.t}
+                return:Types.t}
 
 let rec check prog =
-  let ctx = {venv=E.base_venv;tenv=E.base_tenv;rettype=T.Unit} in
+  let ctx = {venv=E.base_venv;tenv=E.base_tenv;return=T.Unit} in
   let ctx' = check_prog ctx prog in
   (ctx'.venv,ctx'.tenv)
 
@@ -22,39 +22,39 @@ and check_prog ctx prog =
 
 and check_decl ctx decl =
   match decl with
-  | A.FunDec (name,typ,args,body,pos) ->
-     check_fundec ctx name typ args body pos
+  | A.FunDec (name,typ,params,body,pos) ->
+     check_fundec ctx name typ params body pos
   | A.VarDec (name,typ,init,pos) ->
      check_vardec ctx name typ init pos
 
-and check_fundec ctx name ret_typ args body pos =
+and check_fundec ctx name ret_typ params body pos =
   assert_unique ctx.venv name pos;
 
-  (* get function args final types *)
-  let actual_arg_type (_,arg_typ) =
-    actual_type ctx.tenv arg_typ pos in
-  let arg_types = List.map actual_arg_type args in
+  (* get function params final types *)
+  let actual_param_type (_,typ) =
+    actual_type ctx.tenv typ pos in
+  let param_types = List.map actual_param_type params in
 
   (* get function return final type *)
-  let rettype = actual_type ctx.tenv ret_typ pos in
+  let return = actual_type ctx.tenv ret_typ pos in
 
   (* make a new func entry to var environtment *)
   let entry = E.FunEntry {E.label=Temp.new_label();
-                          E.args=arg_types;
-                          E.rettype=rettype} in
+                          E.params=param_types;
+                          E.return=return} in
 
   let venv' = S.put ctx.venv name entry in
   let ctx' = {ctx with venv=venv'} in
 
-  (* make a new entry for each function arg to the var env *)
-  let push_arg_to_env venv (arg_sym,arg_typ) =
-    let typ = actual_type ctx.tenv arg_typ pos in
+  (* make a new entry for each function param to the var env *)
+  let push_param_to_env venv (param_sym,param_typ) =
+    let typ = actual_type ctx.tenv param_typ pos in
     let entry = E.VarEntry {E.typ=typ} in
-    S.put venv arg_sym entry in
-  let venv'' = List.fold_left push_arg_to_env venv' args in
-  let ctx'' = {ctx with venv=venv''; rettype=rettype} in
+    S.put venv param_sym entry in
+  let venv'' = List.fold_left push_param_to_env venv' params in
+  let ctx'' = {ctx with venv=venv''; return=return} in
 
-  (* check function body with the args env *)
+  (* check function body with the params env *)
   ignore (check_stmt ctx'' body);
 
   (ctx', T.Unit)
@@ -112,8 +112,8 @@ and check_callexp ctx sym args pos =
        (fun exp decl_arg_typ ->
         let exp_typ = check_exp ctx exp pos in
         assert_type exp_typ decl_arg_typ pos)
-       args funentry.E.args;
-     funentry.E.rettype
+       args funentry.E.params;
+     funentry.E.return
 
 and check_opexp ctx left op right pos =
   let left = check_exp ctx left pos
@@ -128,7 +128,7 @@ and check_stmt ctx stmt =
      check_decl ctx decl
   | A.ReturnStmt (exp,pos) ->
      let ret_typ = check_exp ctx exp pos in
-     assert_type ret_typ ctx.rettype pos;
+     assert_type ret_typ ctx.return pos;
      (ctx,T.Unit)
   | A.SeqStmt (stmts,pos) ->
      ignore (List.fold_left

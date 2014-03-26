@@ -4,7 +4,7 @@ let print_syntax_error lexbuf =
   and cnum = pos.Lexing.pos_cnum - pos.Lexing.pos_bol + 1 in
   Printf.fprintf stderr "%d:%d: syntax error\n%!" cnum lnum
 
-let compile in_buffer = 
+let compile in_buffer =
   let lexbuf = Lexing.from_channel in_buffer in
   try
     let prog = Parser.program Lexer.token lexbuf in
@@ -14,8 +14,8 @@ let compile in_buffer =
   with
   | Lexer.LexingError ->
      print_syntax_error lexbuf
-  | Parser.Error -> 
+  | Parser.Error ->
      print_syntax_error lexbuf
-  
+
 let _  =
   compile stdin
