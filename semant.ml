@@ -33,7 +33,7 @@ and check_fundec venv tenv name ret_typ params body pos =
   let return = actual_type tenv ret_typ pos in
 
   (* make a new func entry to var environtment *)
-  let func = {E.label=Temp.named_label name;
+  let func = {E.label=Label.named_label name;
               E.params=param_types;
               E.return=return} in
   let entry = E.FunEntry func in
