@@ -32,7 +32,7 @@ and check_fundec ctx name ret_typ args body pos =
                     (fun (_,arg_typ) -> actual_type ctx.tenv arg_typ pos)
                     args in
   let ret_typ = actual_type ctx.tenv ret_typ pos in
-  let entry = E.FunEntry (arg_types, ret_typ) in
+  let entry = E.FunEntry {E.args=arg_types; E.rettype=ret_typ} in
   let venv' = List.fold_left
                 (fun venv (arg_sym,arg_typ) ->
                  let typ = actual_type ctx.tenv arg_typ pos in
@@ -87,13 +87,13 @@ and check_exp ctx exp pos =
        | Some(E.VarEntry _) ->
           error ("function expected: "^(Symbol.name sym)) pos;
           T.Unit
-       | Some(E.FunEntry (arg_types,ret_type)) ->
+       | Some(E.FunEntry funentry) ->
           List.iter2
             (fun exp decl_arg_typ ->
              let exp_typ = check_exp ctx exp pos in
              assert_type exp_typ decl_arg_typ pos)
-            args arg_types;
-          ret_type
+            args funentry.E.args;
+          funentry.E.rettype
      end
   | A.OpExp (left,op,right,pos) ->
      let left = check_exp ctx left pos

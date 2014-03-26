@@ -1,8 +1,10 @@
 type varentry = {typ:Types.t}
 
+type funentry = {args:Types.t list; rettype: Types.t}
+
 type ventry =
   | VarEntry of varentry
-  | FunEntry of Types.t list * Types.t
+  | FunEntry of funentry
 
 let make_env lst : ventry Symbol.table =
   List.fold_left
