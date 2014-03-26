@@ -31,14 +31,16 @@ and trans_decl ctx decl =
      trans_vardec ctx name typ init pos
 
 and trans_fundec ctx name typ args body pos =
-  let func_label = Temp.new_label () in
-  let header_code = [I.Comment (S.name name);
-                     I.Label func_label]
-  and footer_code = [I.Ret] in
-  (* TODO args *)
-  (* TODO body *)
-  let code = header_code@footer_code in
-  {ctx with code=ctx.code@code}
+  match S.get ctx.venv name with
+  | Some(E.FunEntry func) ->
+     let header_code = [I.Comment (S.name name); I.Label func.E.label]
+     and footer_code = [I.Ret] in
+     (* TODO args *)
+     (* TODO body *)
+     let code = header_code@footer_code in
+     {ctx with code=ctx.code@code}
+  | _ ->
+     failwith "internal error"
 
 and trans_vardec ctx name typ init pos =
   (* TODO *)
