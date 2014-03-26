@@ -1,6 +1,6 @@
 type varentry = {typ:Types.t}
 
-type funentry = {label: Symbol.symbol; params:Types.t list; return: Types.t}
+type funentry = {label: Symbol.symbol; params:Types.t list; return:Types.t}
 
 type ventry =
   | VarEntry of varentry
