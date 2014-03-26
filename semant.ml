@@ -28,22 +28,35 @@ and check_decl ctx decl =
 
 and check_fundec ctx name ret_typ args body pos =
   assert_unique ctx.venv name pos;
-  let arg_types = List.map
-                    (fun (_,arg_typ) -> actual_type ctx.tenv arg_typ pos)
-                    args in
+
+  (* get function args final types *)
+  let actual_arg_type (_,arg_typ) =
+    actual_type ctx.tenv arg_typ pos in
+  let arg_types = List.map actual_arg_type args in
+
+  (* get function return final type *)
   let rettype = actual_type ctx.tenv ret_typ pos in
+
+  (* make a new func entry to var environtment *)
   let entry = E.FunEntry {E.label=Temp.new_label();
                           E.args=arg_types;
                           E.rettype=rettype} in
-  let venv' = List.fold_left
-                (fun venv (arg_sym,arg_typ) ->
-                 let typ = actual_type ctx.tenv arg_typ pos in
-                 let entry = E.VarEntry {E.typ=typ} in
-                 S.put venv arg_sym entry)
-                (S.put ctx.venv name entry)
-                args in
-  let ctx' = {ctx with venv=venv';rettype=rettype} in
-  check_stmt ctx' body
+
+  let venv' = S.put ctx.venv name entry in
+  let ctx' = {ctx with venv=venv'} in
+
+  (* make a new entry for each function arg to the var env *)
+  let push_arg_to_env venv (arg_sym,arg_typ) =
+    let typ = actual_type ctx.tenv arg_typ pos in
+    let entry = E.VarEntry {E.typ=typ} in
+    S.put venv arg_sym entry in
+  let venv'' = List.fold_left push_arg_to_env venv' args in
+  let ctx'' = {ctx with venv=venv''; rettype=rettype} in
+
+  (* check function body with the args env *)
+  ignore (check_stmt ctx'' body);
+
+  (ctx', T.Unit)
 
 and check_vardec ctx name typ init pos =
   assert_unique ctx.venv name pos;

@@ -1,5 +1,5 @@
 all:
-	ocamlbuild -use-menhir -menhir "menhir -v" minicsharp.native
+	ocamlbuild -use-menhir -menhir "menhir -v" -use-ocamlfind minicsharp.native
 
 clean:
-	@rm -rf _build *.cmi *.cmo minicsharp.native*
+	ocamlbuild -clean
