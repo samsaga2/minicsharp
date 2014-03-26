@@ -6,13 +6,11 @@ module T = Types
 
 type context = {venv:E.ventry S.table;
                 tenv:T.t S.table;
-                regs:I.reg S.table;
                 code:I.inst list}
 
 let rec trans venv tenv prog =
   let ctx = {venv=venv;
              tenv=tenv;
-             regs=S.empty;
              code=[]} in
   let ctx' = trans_prog ctx prog in
   ctx'.code
@@ -39,23 +37,15 @@ and trans_fundec ctx name typ args body pos =
      let header_code = [I.Label func.E.label] in
 
      (* function args code *)
-     let arg_regs = List.map
-                      (fun (arg_typ,arg_sym) ->
-                       (arg_sym,Temp.new_reg ()))
-                      args in
-     let args_code = List.mapi
-                       (fun idx (_,arg_reg) ->
-                        Ir.LoadArgInt (arg_reg,idx))
-                       arg_regs in
-     let ctx' = {ctx with regs=E.extend_env ctx.regs arg_regs;
-                          code=ctx.code@header_code@args_code} in
+     (* TODO *)
 
      (* function body code *)
-     let ctx'' = trans_stmt ctx' body pos in
+     let ctx = {ctx with code=ctx.code@header_code} in
+     let ctx = trans_stmt ctx body pos in
 
      (* function footer code *)
      let footer_code = [I.Ret] in
-     {ctx with code=ctx''.code@footer_code}
+     {ctx with code=ctx.code@footer_code}
   | _ ->
      failwith "internal error"
 
