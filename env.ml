@@ -6,16 +6,11 @@ type ventry =
   | VarEntry of varentry
   | FunEntry of funentry
 
-let make_env lst : ventry Symbol.table =
-  List.fold_left
-    (fun symtable (sym, ty) -> Symbol.put symtable sym ty)
-    Symbol.empty
-    lst
+let make_env lst =
+  List.fold_left Symbol.put_pair Symbol.empty lst
 
-let base_tenv : Types.t Symbol.table =
-  List.fold_left
-    (fun symtable (sym, ty) -> Symbol.put symtable sym ty)
-    Symbol.empty
+let base_tenv =
+  make_env
     [Symbol.symbol "int", Types.Int;
      Symbol.symbol "void", Types.Unit;
      Symbol.symbol "bool", Types.Bool]

@@ -25,10 +25,13 @@ type 'a table = 'a SymbolTable.t
 
 let empty = SymbolTable.empty
 
-let put symtable (_, id) value =
+let put symtable (_,id) value =
   SymbolTable.add id value symtable
 
-let get symtable (_, id) =
+let put_pair symtable (key,value) =
+  put symtable key value
+
+let get symtable (_,id) =
   try
     Some (SymbolTable.find id symtable)
   with Not_found ->
