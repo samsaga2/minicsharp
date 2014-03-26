@@ -7,7 +7,7 @@ type prog = decl list
    | FunDec of symbol * symbol * (symbol * symbol) list * stmt * pos
    | VarDec of symbol * symbol * exp option * pos
  and stmt =
-   | DeclStmt of decl * pos
+   | LetStmt of symbol * symbol * exp option * pos
    | ReturnStmt of exp * pos
    | SeqStmt of stmt list * pos
    | IfStmt of exp * stmt * pos

@@ -48,8 +48,10 @@ var_decl:
         { VarDec (n,t,Some e,$startpos) }
 
 stmt:
-  | var_decl
-        { DeclStmt ($1,$startpos) }
+  | t=id n=id SEMICOLON
+        { LetStmt (n,t,None,$startpos) }
+  | t=id n=id EQ e=exp SEMICOLON
+        { LetStmt (n,t,Some e,$startpos) }
   | RETURN SEMICOLON
         { ReturnStmt (NilExp ($startpos),$startpos) }
   | RETURN e=exp SEMICOLON

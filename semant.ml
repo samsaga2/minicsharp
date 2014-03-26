@@ -11,7 +11,7 @@ and check_prog venv tenv prog =
   | [] ->
      (venv,tenv)
   | decl::tail ->
-     let (venv',tenv',typ) = check_decl venv tenv decl in
+     let (venv',tenv') = check_decl venv tenv decl in
      check_prog venv' tenv' tail
 
 and check_decl venv tenv decl =
@@ -50,7 +50,7 @@ and check_fundec venv tenv name ret_typ params body pos =
   (* check function body with the params env *)
   ignore (check_stmt venv'' tenv func body);
 
-  (venv', tenv, T.Unit)
+  (venv',tenv)
 
 and check_vardec venv tenv name typ init pos =
   assert_unique venv name pos;
@@ -65,7 +65,7 @@ and check_vardec venv tenv name typ init pos =
   end;
   let entry = E.VarEntry {E.typ=typ} in
   let venv' = S.put venv name entry in
-  (venv', tenv, T.Unit)
+  (venv',tenv)
 
 and check_exp venv tenv exp pos =
   match exp with
@@ -116,34 +116,34 @@ and check_opexp venv tenv left op right pos =
 
 and check_stmt venv tenv func stmt =
   match stmt with
-  | A.DeclStmt (decl,pos) ->
-     check_decl venv tenv decl
+  | A.LetStmt (name,typ,exp,pos) ->
+     check_vardec venv tenv name typ exp pos
   | A.ReturnStmt (exp,pos) ->
      let ret_typ = check_exp venv tenv exp pos in
      assert_type ret_typ func.E.return pos;
-     (venv,tenv,T.Unit)
+     (venv,tenv)
   | A.SeqStmt (stmts,pos) ->
      ignore (List.fold_left
-               (fun (venv',tenv',typ) stmt ->
+               (fun (venv',tenv') stmt ->
                 check_stmt venv' tenv' func stmt)
-               (venv,tenv,T.Unit)
+               (venv,tenv)
                stmts);
-     (venv,tenv,T.Unit)
+     (venv,tenv)
   | A.IfStmt (cond,then_body,pos) ->
      let cond_typ = check_exp venv tenv cond pos in
      assert_type cond_typ T.Bool pos;
      ignore (check_stmt venv tenv func then_body);
-     (venv,tenv,T.Unit)
+     (venv,tenv)
   | A.IfElseStmt (cond,then_body,else_body,pos) ->
      let cond_typ = check_exp venv tenv cond pos in
      assert_type cond_typ T.Bool pos;
      ignore (check_stmt venv tenv func then_body);
      ignore (check_stmt venv tenv func else_body);
-     (venv,tenv,T.Unit)
+     (venv,tenv)
   | A.IgnoreStmt (exp,pos) ->
      let exp_typ = check_exp venv tenv exp pos in
      ignore exp_typ;
-     (venv,tenv,T.Unit)
+     (venv,tenv)
 
 and actual_type tenv sym pos =
   match S.get tenv sym with
