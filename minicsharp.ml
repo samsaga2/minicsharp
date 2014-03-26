@@ -8,9 +8,8 @@ let compile in_buffer =
   let lexbuf = Lexing.from_channel in_buffer in
   try
     let prog = Parser.program Lexer.token lexbuf in
-    let (venv,tenv) = Semant.check prog in
-    let code = Translate.trans venv tenv prog in
-    print_endline (Ir.print_code code)
+    Semant.check prog;
+    Frag.print_frags ()
   with
   | Lexer.LexingError ->
      print_syntax_error lexbuf

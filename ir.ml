@@ -17,6 +17,6 @@ let print_inst inst =
   | LoadArgInt (dst,src) ->
      Printf.sprintf "\t%%%d = loadarg.i %d" dst src
 
-let print_code code =
-  let insts = List.map print_inst code in
+let print_insts insts =
+  let insts = List.map print_inst insts in
   String.concat "\n" insts
