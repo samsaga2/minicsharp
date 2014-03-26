@@ -84,22 +84,7 @@ and check_exp ctx exp pos =
   | A.VarExp (sym,pos) ->
      check_varexp ctx sym pos
   | A.CallExp (sym,args,pos) ->
-     begin
-       match S.get ctx.venv sym with
-       | None ->
-          error ("undeclared function: "^(Symbol.name sym)) pos;
-          T.Unit
-       | Some(E.VarEntry _) ->
-          error ("function expected: "^(Symbol.name sym)) pos;
-          T.Unit
-       | Some(E.FunEntry funentry) ->
-          List.iter2
-            (fun exp decl_arg_typ ->
-             let exp_typ = check_exp ctx exp pos in
-             assert_type exp_typ decl_arg_typ pos)
-            args funentry.E.args;
-          funentry.E.rettype
-     end
+     check_callexp ctx sym args pos
   | A.OpExp (left,op,right,pos) ->
      let left = check_exp ctx left pos
      and right = check_exp ctx right pos in
@@ -107,7 +92,7 @@ and check_exp ctx exp pos =
      assert_number left pos;
      left
 
-and check_varexp ctx sym pos  =
+and check_varexp ctx sym pos =
   match S.get ctx.venv sym with
   | None ->
      error ("undeclared variable: "^(Symbol.name sym)) pos;
@@ -117,6 +102,22 @@ and check_varexp ctx sym pos  =
      T.Unit
   | Some(E.VarEntry varentry) ->
      varentry.E.typ
+
+and check_callexp ctx sym args pos =
+  match S.get ctx.venv sym with
+  | None ->
+     error ("undeclared function: "^(Symbol.name sym)) pos;
+     T.Unit
+  | Some(E.VarEntry _) ->
+     error ("function expected: "^(Symbol.name sym)) pos;
+     T.Unit
+  | Some(E.FunEntry funentry) ->
+     List.iter2
+       (fun exp decl_arg_typ ->
+        let exp_typ = check_exp ctx exp pos in
+        assert_type exp_typ decl_arg_typ pos)
+       args funentry.E.args;
+     funentry.E.rettype
 
 and check_stmt ctx stmt =
   match stmt with
