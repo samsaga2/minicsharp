@@ -5,7 +5,7 @@ type inst =
   | Ret
   | Label of Symbol.symbol
   | Comment of string
-  | LoadArg of reg * reg
+  | LoadArgInt of reg * reg
 
 let print_inst inst =
   match inst with
@@ -17,8 +17,8 @@ let print_inst inst =
      (Symbol.name sym)^":"
   | Comment str ->
      "\t;; "^str
-  | LoadArg (dst,src) ->
-     Printf.sprintf "\t%d = loadarg %d" dst src
+  | LoadArgInt (dst,src) ->
+     Printf.sprintf "\t%%%d = loadarg.i %d" dst src
 
 let print_code code =
   let insts = List.map print_inst code in

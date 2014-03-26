@@ -6,8 +6,11 @@ type ventry =
   | VarEntry of varentry
   | FunEntry of funentry
 
+let extend_env env lst =
+  List.fold_left Symbol.put_pair env lst
+
 let make_env lst =
-  List.fold_left Symbol.put_pair Symbol.empty lst
+  extend_env Symbol.empty lst
 
 let base_tenv =
   make_env

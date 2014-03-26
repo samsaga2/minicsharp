@@ -10,7 +10,7 @@ let reg_counter = ref 0
 let reset_reg_counter () =
   reg_counter := 0
 
-let new_reg () =
+let new_reg () : Ir.reg =
+  let reg = !reg_counter in
   incr reg_counter;
-  let id = Printf.sprintf "r%d" !reg_counter in
-  Symbol.symbol id
+  reg
