@@ -36,7 +36,7 @@ and check_fundec ctx name ret_typ args body pos =
   let venv' = List.fold_left
                 (fun venv (arg_sym,arg_typ) ->
                  let typ = actual_type ctx.tenv arg_typ pos in
-                 let entry = E.VarEntry typ in
+                 let entry = E.VarEntry {E.typ=typ} in
                  S.put venv arg_sym entry)
                 (S.put ctx.venv name entry)
                 args in
@@ -55,7 +55,7 @@ and check_vardec ctx name typ init pos =
          assert_type typ exp_type pos;
        end
   end;
-  let entry = E.VarEntry typ in
+  let entry = E.VarEntry {E.typ=typ} in
   let venv' = S.put ctx.venv name entry in
   let ctx' = {ctx with venv=venv'} in
   (ctx', T.Unit)
@@ -75,8 +75,8 @@ and check_exp ctx exp pos =
        | Some(E.FunEntry _) ->
           error ("variable expected: "^(Symbol.name sym)) pos;
           T.Unit
-       | Some(E.VarEntry typ) ->
-          typ
+       | Some(E.VarEntry varentry) ->
+          varentry.E.typ
      end
   | A.CallExp (sym,args,pos) ->
      begin

@@ -1,5 +1,7 @@
+type varentry = {typ:Types.t}
+
 type ventry =
-  | VarEntry of Types.t
+  | VarEntry of varentry
   | FunEntry of Types.t list * Types.t
 
 let make_env lst : ventry Symbol.table =
