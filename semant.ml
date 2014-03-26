@@ -82,17 +82,7 @@ and check_exp ctx exp pos =
   | A.IntExp (_,_) ->
      T.Int
   | A.VarExp (sym,pos) ->
-     begin
-       match S.get ctx.venv sym with
-       | None ->
-          error ("undeclared variable: "^(Symbol.name sym)) pos;
-          T.Unit
-       | Some(E.FunEntry _) ->
-          error ("variable expected: "^(Symbol.name sym)) pos;
-          T.Unit
-       | Some(E.VarEntry varentry) ->
-          varentry.E.typ
-     end
+     check_varexp ctx sym pos
   | A.CallExp (sym,args,pos) ->
      begin
        match S.get ctx.venv sym with
@@ -116,6 +106,17 @@ and check_exp ctx exp pos =
      assert_type left right pos;
      assert_number left pos;
      left
+
+and check_varexp ctx sym pos  =
+  match S.get ctx.venv sym with
+  | None ->
+     error ("undeclared variable: "^(Symbol.name sym)) pos;
+     T.Unit
+  | Some(E.FunEntry _) ->
+     error ("variable expected: "^(Symbol.name sym)) pos;
+     T.Unit
+  | Some(E.VarEntry varentry) ->
+     varentry.E.typ
 
 and check_stmt ctx stmt =
   match stmt with
