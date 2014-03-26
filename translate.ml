@@ -36,8 +36,7 @@ and trans_fundec ctx name typ args body pos =
   match S.get ctx.venv name with
   | Some(E.FunEntry func) ->
      (* function header code *)
-     let header_code = [I.Comment (S.name name);
-                        I.Label func.E.label] in
+     let header_code = [I.Label func.E.label] in
 
      (* function args code *)
      let arg_regs = List.map

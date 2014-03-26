@@ -4,7 +4,6 @@ type inst =
   | Nop
   | Ret
   | Label of Symbol.symbol
-  | Comment of string
   | LoadArgInt of reg * reg
 
 let print_inst inst =
@@ -15,8 +14,6 @@ let print_inst inst =
      "\tret"
   | Label sym ->
      (Symbol.name sym)^":"
-  | Comment str ->
-     "\t;; "^str
   | LoadArgInt (dst,src) ->
      Printf.sprintf "\t%%%d = loadarg.i %d" dst src
 
