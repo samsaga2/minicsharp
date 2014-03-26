@@ -14,7 +14,8 @@ let rec check prog =
 
 and check_prog ctx prog =
   match prog with
-  | [] -> ctx
+  | [] ->
+     ctx
   | decl::tail ->
      let (ctx',typ) = check_decl ctx decl in
      check_prog ctx' tail
@@ -63,12 +64,11 @@ and check_vardec ctx name typ init pos =
   let typ = actual_type ctx.tenv typ pos in
   begin
     match init with
-    | None -> ()
+    | None ->
+       ()
     | Some(init) ->
-       begin
-         let exp_type = check_exp ctx init pos in
-         assert_type typ exp_type pos;
-       end
+       let exp_type = check_exp ctx init pos in
+       assert_type typ exp_type pos;
   end;
   let entry = E.VarEntry {E.typ=typ} in
   let venv' = S.put ctx.venv name entry in
@@ -160,8 +160,8 @@ and actual_type tenv sym pos =
   | Some(typ) ->
      match typ with
      | T.Unit -> T.Unit
-     | T.Nil -> T.Nil
-     | T.Int -> T.Int
+     | T.Nil  -> T.Nil
+     | T.Int  -> T.Int
      | T.Bool -> T.Bool
 
 and error msg pos =
