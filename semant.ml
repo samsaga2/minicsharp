@@ -2,26 +2,28 @@ module A = Ast
 module E = Env
 module S = Symbol
 module T = Types
+module Tr = Translate
 
 let rec check prog =
-  ignore (check_prog E.base_venv E.base_tenv prog)
+  let level = {Tr.num_regs=0} in
+  ignore (check_prog E.base_venv E.base_tenv level prog)
 
-and check_prog venv tenv prog =
+and check_prog venv tenv level prog =
   match prog with
   | [] ->
      (venv,tenv)
   | decl::tail ->
-     let (venv',tenv') = check_decl venv tenv decl in
-     check_prog venv' tenv' tail
+     let (venv',tenv') = check_decl venv tenv level decl in
+     check_prog venv' tenv' level tail
 
-and check_decl venv tenv decl =
+and check_decl venv tenv level decl =
   match decl with
   | A.FunDec (name,typ,params,body,pos) ->
-     check_fundec venv tenv name typ params body pos
+     check_fundec venv tenv level name typ params body pos
   | A.VarDec (name,typ,init,pos) ->
-     check_vardec venv tenv name typ init pos
+     check_vardec venv tenv level name typ init pos
 
-and check_fundec venv tenv name ret_typ params body pos =
+and check_fundec venv tenv level name ret_typ params body pos =
   assert_unique venv name pos;
 
   (* get function params final types *)
@@ -48,12 +50,12 @@ and check_fundec venv tenv name ret_typ params body pos =
   let venv'' = List.fold_left push_param_to_env venv' params in
 
   (* check function body with the params env *)
-  let (insts,_,_) = check_stmt venv'' tenv func body in
+  let (insts,_,_) = check_stmt venv'' tenv level func body in
   Frag.add_proc insts;
 
   (venv',tenv)
 
-and check_vardec venv tenv name typ init pos =
+and check_vardec venv tenv level name typ init pos =
   assert_unique venv name pos;
   let typ = actual_type tenv typ pos in
   begin
@@ -61,7 +63,7 @@ and check_vardec venv tenv name typ init pos =
     | None ->
        ()
     | Some(init) ->
-       let (insts,exp_type) = check_exp venv tenv init pos in
+       let (insts,exp_type) = check_exp venv tenv level init pos in
        assert_type typ exp_type pos;
        Frag.add_var name insts
   end;
@@ -69,22 +71,22 @@ and check_vardec venv tenv name typ init pos =
   let venv' = S.put venv name entry in
   (venv',tenv)
 
-and check_exp venv tenv exp pos =
+and check_exp venv tenv level exp pos =
   match exp with
   | A.NilExp (_) ->
-     let insts = Translate.loadnil () in
+     let insts = Tr.gen_nil level in
      (insts, T.Nil)
   | A.IntExp (num,_) ->
-     let insts = Translate.loadint num in
+     let insts = Tr.gen_int level num in
      (insts, T.Int)
   | A.VarExp (sym,pos) ->
-     check_varexp venv tenv sym pos
+     check_varexp venv tenv level sym pos
   | A.CallExp (sym,args,pos) ->
-     check_callexp venv tenv sym args pos
+     check_callexp venv tenv level sym args pos
   | A.OpExp (left,op,right,pos) ->
-     check_opexp venv tenv left op right pos
+     check_opexp venv tenv level left op right pos
 
-and check_varexp venv tenv sym pos =
+and check_varexp venv tenv level sym pos =
   match S.get venv sym with
   | None ->
      error ("undeclared variable: "^(Symbol.name sym)) pos;
@@ -95,7 +97,7 @@ and check_varexp venv tenv sym pos =
   | Some(E.VarEntry varentry) ->
      ([], varentry.E.typ) (* TODO *)
 
-and check_callexp venv tenv sym args pos =
+and check_callexp venv tenv level sym args pos =
   match S.get venv sym with
   | None ->
      error ("undeclared function: "^(Symbol.name sym)) pos;
@@ -106,52 +108,52 @@ and check_callexp venv tenv sym args pos =
   | Some(E.FunEntry funentry) ->
      List.iter2
        (fun exp decl_arg_typ ->
-        let (insts,typ) = check_exp venv tenv exp pos in
+        let (insts,typ) = check_exp venv tenv level exp pos in
         assert_type typ decl_arg_typ pos)
        args funentry.E.params;
      ([], funentry.E.return) (* TODO *)
 
-and check_opexp venv tenv left op right pos =
-  let (linsts,left) = check_exp venv tenv left pos
-  and (rinsts,right) = check_exp venv tenv right pos in
+and check_opexp venv tenv level left op right pos =
+  let (linsts,left) = check_exp venv tenv level left pos
+  and (rinsts,right) = check_exp venv tenv level right pos in
   assert_type left right pos;
   assert_number left pos;
   (rinsts@linsts, left) (* TODO *)
 
-and check_stmt venv tenv func stmt =
+and check_stmt venv tenv level func stmt =
   match stmt with
   | A.LetStmt (name,typ,exp,pos) ->
-     check_letstmt venv tenv name typ exp pos
+     check_letstmt venv tenv level name typ exp pos
   | A.ReturnStmt (exp,pos) ->
-     let (insts,return) = check_exp venv tenv exp pos in
+     let (insts,return) = check_exp venv tenv level exp pos in
      assert_type return func.E.return pos;
      ([],venv,tenv) (* TODO *)
   | A.SeqStmt (stmts,pos) ->
      let (insts,_,_) = 
        List.fold_left
          (fun (prev_insts,venv,tenv) stmt ->
-          let (insts,venv,tenv) = check_stmt venv tenv func stmt in
+          let (insts,venv,tenv) = check_stmt venv tenv level func stmt in
           (prev_insts@insts,venv,tenv))
          ([],venv,tenv)
          stmts in
      (insts,venv,tenv)
   | A.IfStmt (cond,then_body,pos) ->
-     let (insts,cond_typ) = check_exp venv tenv cond pos in
+     let (insts,cond_typ) = check_exp venv tenv level cond pos in
      assert_type cond_typ T.Bool pos;
-     ignore (check_stmt venv tenv func then_body);
+     ignore (check_stmt venv tenv level func then_body);
      ([],venv,tenv) (* TODO *)
   | A.IfElseStmt (cond,then_body,else_body,pos) ->
-     let (insts,cond_typ) = check_exp venv tenv cond pos in
+     let (insts,cond_typ) = check_exp venv tenv level cond pos in
      assert_type cond_typ T.Bool pos;
-     ignore (check_stmt venv tenv func then_body);
-     ignore (check_stmt venv tenv func else_body);
+     ignore (check_stmt venv tenv level func then_body);
+     ignore (check_stmt venv tenv level func else_body);
      ([],venv,tenv) (* TODO *)
   | A.IgnoreStmt (exp,pos) ->
-     let (insts,exp_typ) = check_exp venv tenv exp pos in
+     let (insts,exp_typ) = check_exp venv tenv level exp pos in
      ignore exp_typ;
      (insts,venv,tenv)
 
-and check_letstmt venv tenv name typ init pos =
+and check_letstmt venv tenv level name typ init pos =
   assert_unique venv name pos;
   let typ = actual_type tenv typ pos in
   begin
@@ -159,7 +161,7 @@ and check_letstmt venv tenv name typ init pos =
     | None ->
        ()
     | Some(init) ->
-       let (insts,exp_type) = check_exp venv tenv init pos in
+       let (insts,exp_type) = check_exp venv tenv level init pos in
        (* TODO *)
        assert_type typ exp_type pos;
   end;
