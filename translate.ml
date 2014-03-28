@@ -15,38 +15,43 @@ let alloc_local frame =
 (* gen *)
 let gen_int frame num =
   let dst = Frame.alloc_reg frame in
-  [I.LoadConstInt (dst,num)]
+  (dst, [I.LoadConstInt (dst,num)])
 
 let gen_byte frame num =
   let dst = Frame.alloc_reg frame in
-  [I.LoadConstByte (dst,num)]
+  (dst, [I.LoadConstByte (dst,num)])
 
 let gen_nil frame =
   gen_byte frame 0
 
 let gen_funcarg frame typ index =
   let dst = Frame.alloc_reg frame in
-  match typ with
-  | Types.Int ->
-     [I.LoadArgInt (dst,index)]
-  | Types.Byte ->
-     [I.LoadArgByte (dst,index)]
-  | _ ->
-     failwith "Internal error"
+  let inst = match typ with
+    | Types.Int ->
+       [I.LoadArgInt (dst,index)]
+    | Types.Byte ->
+       [I.LoadArgByte (dst,index)]
+    | _ ->
+       failwith "Internal error" in
+  (dst, inst)
 
 let gen_load_label frame label typ =
   let dst = Frame.alloc_reg frame in
-  match typ with
-  | Types.Int ->
-     [I.LoadInt (dst,label)]
-  | Types.Byte ->
-     [I.LoadByte (dst,label)]
-  | _ ->
-     failwith "Internal error"
+  let inst = match typ with
+    | Types.Int ->
+       [I.LoadInt (dst,label)]
+    | Types.Byte ->
+       [I.LoadByte (dst,label)]
+    | _ ->
+       failwith "Internal error" in
+  (dst, inst)
 
 let gen_load_access frame typ access =
   match access with
   | InLabel (label) ->
      gen_load_label frame label typ
   | InReg (reg) ->
-     []
+     (reg, [])
+
+let gen_ret src =
+  [I.Ret src]

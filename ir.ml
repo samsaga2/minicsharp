@@ -1,8 +1,10 @@
+open Batteries
+
 type reg = int
 
 type inst =
   | Nop
-  | Ret
+  | Ret of reg
   | LoadArgInt of reg * int
   | LoadArgByte of reg * int
   | LoadConstInt of reg * int
@@ -14,8 +16,8 @@ let print_inst inst =
   match inst with
   | Nop ->
      "\tnop"
-  | Ret ->
-     "\tret"
+  | Ret (src) ->
+     Printf.sprintf "\tret %%%d" src
   | LoadArgInt (dst,src) ->
      Printf.sprintf "\t%%%d = loadarg.i %d" dst src
   | LoadArgByte (dst,src) ->
