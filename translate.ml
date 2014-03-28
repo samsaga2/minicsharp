@@ -1,15 +1,8 @@
 module I = Ir
 
-type level = {mutable num_regs:int}
-
-let alloc_reg level =
-  let reg = level.num_regs in
-  level.num_regs <- level.num_regs + 1;
-  reg
-
-let gen_int level num =
-  let dst = alloc_reg level in
+let gen_int frame num =
+  let dst = Frame.alloc_reg frame in
   [I.LoadConstInt (dst,num)]
 
-let gen_nil level =
-  gen_int level 0
+let gen_nil frame =
+  gen_int frame 0
