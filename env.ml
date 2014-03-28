@@ -6,6 +6,12 @@ type ventry =
   | VarEntry of varentry
   | FunEntry of funentry
 
+let make_fun label params return =
+  FunEntry {label=label; params=params; return=return}
+
+let make_var typ access =
+  VarEntry {typ=typ; access=access}
+
 let extend_env env lst =
   List.fold_left Symbol.put_pair env lst
 

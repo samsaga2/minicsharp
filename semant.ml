@@ -25,33 +25,30 @@ and check_decl venv tenv decl =
 and check_fundec venv tenv name ret_typ params body pos =
   assert_unique venv name pos;
 
-  (* get function params final types *)
-  let actual_param_type (_,typ) =
-    actual_type tenv typ pos in
-  let param_types = List.map actual_param_type params in
-
   (* get function return final type *)
   let return = actual_type tenv ret_typ pos in
 
+  (* get function params final types *)
+  let params_types = List.map
+                      (fun (_,typ) -> actual_type tenv typ pos)
+                      params in
+
   (* make a new func entry to var environtment *)
   let label = Label.named_label name in
-  let func = {E.label=label;
-              E.params=param_types;
-              E.return=return} in
-  let entry = E.FunEntry func in
+  let func = E.make_fun label params_types return in
+  let venv' = S.put venv name func in
 
   (* make a new entry for each function param to the var env *)
   let frame = Frame.new_frame () in
   let push_param_to_env venv (param_sym,param_typ) =
     let typ = actual_type tenv param_typ pos in
     let access = Tr.alloc_local frame in
-    let entry = E.VarEntry {E.typ=typ;access=access} in
+    let entry = E.make_var typ access in
     S.put venv param_sym entry in
-  let venv' = S.put venv name entry in
   let venv'' = List.fold_left push_param_to_env venv' params in
 
   (* check function body with the params env *)
-  let (insts,_,_) = check_stmt venv'' tenv frame func body in
+  let (insts,_,_) = check_stmt venv'' tenv frame return body in
   Frag.add_proc label insts;
 
   (venv',tenv)
@@ -70,7 +67,7 @@ and check_vardec venv tenv name typ init pos =
        Frag.add_var name insts
   end;
   let access = Tr.label name in
-  let entry = E.VarEntry {E.typ=typ;access=access} in
+  let entry = E.make_var typ access in
   let venv' = S.put venv name entry in
   (venv',tenv)
 
@@ -123,19 +120,19 @@ and check_opexp venv tenv frame left op right pos =
   assert_number left pos;
   (rinsts@linsts, left) (* TODO *)
 
-and check_stmt venv tenv frame func stmt =
+and check_stmt venv tenv frame rettyp stmt =
   match stmt with
   | A.LetStmt (name,typ,exp,pos) ->
      check_letstmt venv tenv frame name typ exp pos
   | A.ReturnStmt (exp,pos) ->
      let (insts,return) = check_exp venv tenv frame exp pos in
-     assert_type return func.E.return pos;
+     assert_type return rettyp pos;
      ([],venv,tenv) (* TODO *)
   | A.SeqStmt (stmts,pos) ->
      let (insts,_,_) = 
        List.fold_left
          (fun (prev_insts,venv,tenv) stmt ->
-          let (insts,venv,tenv) = check_stmt venv tenv frame func stmt in
+          let (insts,venv,tenv) = check_stmt venv tenv frame rettyp stmt in
           (prev_insts@insts,venv,tenv))
          ([],venv,tenv)
          stmts in
@@ -143,13 +140,13 @@ and check_stmt venv tenv frame func stmt =
   | A.IfStmt (cond,then_body,pos) ->
      let (insts,cond_typ) = check_exp venv tenv frame cond pos in
      assert_type cond_typ T.Bool pos;
-     ignore (check_stmt venv tenv frame func then_body);
+     ignore (check_stmt venv tenv frame rettyp then_body);
      ([],venv,tenv) (* TODO *)
   | A.IfElseStmt (cond,then_body,else_body,pos) ->
      let (insts,cond_typ) = check_exp venv tenv frame cond pos in
      assert_type cond_typ T.Bool pos;
-     ignore (check_stmt venv tenv frame func then_body);
-     ignore (check_stmt venv tenv frame func else_body);
+     ignore (check_stmt venv tenv frame rettyp then_body);
+     ignore (check_stmt venv tenv frame rettyp else_body);
      ([],venv,tenv) (* TODO *)
   | A.IgnoreStmt (exp,pos) ->
      let (insts,exp_typ) = check_exp venv tenv frame exp pos in
