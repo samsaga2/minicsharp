@@ -54,7 +54,7 @@ stmt:
   | t=id n=id EQ e=exp SEMICOLON
         { LetStmt (n,t,Some e,$startpos) }
   | RETURN SEMICOLON
-        { ReturnStmt (NilExp ($startpos),$startpos) }
+        { ReturnUnitStmt ($startpos) }
   | RETURN e=exp SEMICOLON
         { ReturnStmt (e,$startpos) }
   | body

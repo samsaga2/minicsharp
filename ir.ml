@@ -4,6 +4,7 @@ type reg = int
 
 type inst =
   | Nop
+  | RetUnit
   | Ret of reg
   | LoadArgInt of reg * int
   | LoadArgByte of reg * int
@@ -26,6 +27,8 @@ let print_inst inst =
   match inst with
   | Nop ->
      "\tnop"
+  | RetUnit ->
+     "\tret"
   | Ret (src) ->
      Printf.sprintf "\tret %%%d" src
   | LoadArgInt (dst,src) ->

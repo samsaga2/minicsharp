@@ -8,6 +8,7 @@ type prog = decl list
    | VarDec of symbol * symbol * exp option * pos
  and stmt =
    | LetStmt of symbol * symbol * exp option * pos
+   | ReturnUnitStmt of pos
    | ReturnStmt of exp * pos
    | SeqStmt of stmt list * pos
    | IfStmt of exp * stmt * pos

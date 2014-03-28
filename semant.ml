@@ -148,6 +148,9 @@ and check_stmt venv tenv frame rettyp stmt =
   match stmt with
   | A.LetStmt (name,typ,exp,pos) ->
      check_letstmt venv tenv frame name typ exp pos
+  | A.ReturnUnitStmt (pos) ->
+     let insts = Tr.gen_retunit () in
+     (insts,venv,tenv)
   | A.ReturnStmt (exp,pos) ->
      let (src,insts,return) = check_exp venv tenv frame exp pos in
      assert_type return rettyp pos;

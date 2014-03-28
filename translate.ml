@@ -45,6 +45,9 @@ let gen_load_access frame typ access =
   | InReg (reg) ->
      (reg, [])
 
+let gen_retunit src =
+  [I.RetUnit]
+
 let gen_ret src =
   [I.Ret src]
 
