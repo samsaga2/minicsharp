@@ -33,3 +33,20 @@ let gen_funcarg frame typ index =
      [I.LoadArgByte (dst,index)]
   | _ ->
      failwith "Internal error"
+
+let gen_load_label frame label typ =
+  let dst = Frame.alloc_reg frame in
+  match typ with
+  | Types.Int ->
+     [I.LoadInt (dst,label)]
+  | Types.Byte ->
+     [I.LoadByte (dst,label)]
+  | _ ->
+     failwith "Internal error"
+
+let gen_load_access frame typ access =
+  match access with
+  | InLabel (label) ->
+     gen_load_label frame label typ
+  | InReg (reg) ->
+     []

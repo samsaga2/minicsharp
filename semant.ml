@@ -108,8 +108,9 @@ and check_varexp venv tenv frame sym pos =
   | Some(E.FunEntry _) ->
      Error.variable_expected sym pos;
      ([], T.Unit)
-  | Some(E.VarEntry varentry) ->
-     ([], varentry.E.typ) (* TODO *)
+  | Some(E.VarEntry var) ->
+     let insts = Tr.gen_load_access frame var.E.typ var.E.access in
+     (insts, var.E.typ)
 
 and check_callexp venv tenv frame sym args pos =
   match S.get venv sym with
