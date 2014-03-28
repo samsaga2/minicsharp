@@ -46,7 +46,8 @@ and check_fundec venv tenv name ret_typ params body pos =
 
   (* check function body with the params env *)
   let (insts,_,_) = check_stmt venv'' tenv frame return body in
-  Frag.add_proc label (arg_insts@insts);
+  let ret_insts = Tr.gen_retunit () in
+  Frag.add_proc label (arg_insts@insts@ret_insts);
 
   (venv',tenv)
 
