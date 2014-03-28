@@ -36,6 +36,7 @@ rule token = parse
           | ")" { RPAREN }
           | "{" { LBRACK }
           | "}" { RBRACK }
+          | "==" { DEQ }
           | "=" { EQ }
           | "return" { RETURN }
           | "if" { IF }

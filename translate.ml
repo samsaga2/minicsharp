@@ -58,6 +58,7 @@ let gen_op_int frame op src1 src2 =
     | Ast.SubOp -> [I.SubInt (dst,src1,src2)]
     | Ast.MulOp -> [I.MulInt (dst,src1,src2)]
     | Ast.DivOp -> [I.DivInt (dst,src1,src2)]
+    | Ast.EqOp  -> [I.EqInt  (dst,src1,src2)]
   in
   (dst, insts)
 
@@ -68,6 +69,7 @@ let gen_op_byte frame op src1 src2 =
     | Ast.SubOp -> [I.SubByte (dst,src1,src2)]
     | Ast.MulOp -> [I.MulByte (dst,src1,src2)]
     | Ast.DivOp -> [I.DivByte (dst,src1,src2)]
+    | Ast.EqOp  -> [I.EqByte  (dst,src1,src2)]
   in
   (dst, insts)
 

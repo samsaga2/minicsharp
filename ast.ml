@@ -23,3 +23,4 @@ type prog = decl list
    | OpExp of exp * op * exp * pos
  and op =
    | AddOp | SubOp | MulOp | DivOp
+   | EqOp

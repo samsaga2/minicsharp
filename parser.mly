@@ -6,13 +6,15 @@
 %token <int> BYTE
 %token <string> ID
 %token EOF PLUS MINUS MUL DIV
-%token LPAREN RPAREN COMMA SEMICOLON LBRACK RBRACK RETURN EQ
+%token LPAREN RPAREN COMMA SEMICOLON LBRACK RBRACK RETURN
+%token EQ DEQ
 %token IF ELSE
 
 %nonassoc IFX
 %nonassoc ELSE
 %left PLUS MINUS
 %left MUL DIV
+%nonassoc DEQ
 %nonassoc UMINUS
 
 %start <Ast.prog> program
@@ -101,3 +103,5 @@ exp_op:
        { OpExp (left,MulOp,right,$startpos) }
   | left=exp DIV right=exp
        { OpExp (left,DivOp,right,$startpos) }
+  | left=exp DEQ right=exp
+       { OpExp (left,EqOp,right,$startpos) }

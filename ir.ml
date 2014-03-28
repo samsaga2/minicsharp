@@ -16,10 +16,12 @@ type inst =
   | SubInt of reg * reg * reg
   | MulInt of reg * reg * reg
   | DivInt of reg * reg * reg
+  | EqInt of reg * reg * reg
   | AddByte of reg * reg * reg
   | SubByte of reg * reg * reg
   | MulByte of reg * reg * reg
   | DivByte of reg * reg * reg
+  | EqByte of reg * reg * reg
   | StoreInt of Symbol.symbol * reg
   | StoreByte of Symbol.symbol * reg
   | CallParamInt of reg * int
@@ -58,6 +60,8 @@ let print_inst inst =
      Printf.sprintf "\t%%%d = mul.i %%%d,%%%d" dst src1 src2
   | DivInt (dst,src1,src2) ->
      Printf.sprintf "\t%%%d = div.i %%%d,%%%d" dst src1 src2
+  | EqInt (dst,src1,src2) ->
+     Printf.sprintf "\t%%%d = eq.i %%%d,%%%d" dst src1 src2
   | AddByte (dst,src1,src2) ->
      Printf.sprintf "\t%%%d = add.b %%%d,%%%d" dst src1 src2
   | SubByte (dst,src1,src2) ->
@@ -66,6 +70,8 @@ let print_inst inst =
      Printf.sprintf "\t%%%d = mul.b %%%d,%%%d" dst src1 src2
   | DivByte (dst,src1,src2) ->
      Printf.sprintf "\t%%%d = div.b %%%d,%%%d" dst src1 src2
+  | EqByte (dst,src1,src2) ->
+     Printf.sprintf "\t%%%d = eq.b %%%d,%%%d" dst src1 src2
   | StoreInt (label,src) ->
      let label = Symbol.name label in
      Printf.sprintf "\tstore.i %s,%%%d" label src
