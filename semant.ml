@@ -69,17 +69,19 @@ and check_funcargs venv tenv frame params pos =
 and check_vardec venv tenv name typ init pos =
   assert_unique venv name pos;
   let frame = Frame.new_frame ()
-  and typ = actual_type tenv typ pos in
+  and typ = actual_type tenv typ pos
+  and label = Label.named_label name in
   begin
     match init with
     | None ->
        ()
     | Some(init) ->
-       let (_,insts,exp_type) = check_exp venv tenv frame init pos in
+       let (reg,init_insts,exp_type) = check_exp venv tenv frame init pos in
        assert_type typ exp_type pos;
+       let insts = init_insts@(Tr.gen_store typ label reg) in
        Frag.add_var name insts
   end;
-  let access = Tr.label name in
+  let access = Tr.InLabel label in
   let entry = E.make_var typ access in
   let venv' = S.put venv name entry in
   (venv',tenv)
@@ -181,7 +183,8 @@ and check_letstmt venv tenv frame name typ init pos =
   let typ = actual_type tenv typ pos in
   match init with
     | None ->
-       let access = Tr.alloc_local frame in
+       let reg = Frame.alloc_reg frame in
+       let access = Tr.InReg reg in
        let entry = E.VarEntry {E.typ=typ;access=access} in
        let venv' = S.put venv name entry in
        ([],venv',tenv)

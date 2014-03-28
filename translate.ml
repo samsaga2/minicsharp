@@ -4,14 +4,6 @@ type access =
   | InLabel of Symbol.symbol
   | InReg of I.reg
 
-(* access *)
-let label label =
-  InLabel label
-
-let alloc_local frame =
-  let reg = Frame.alloc_reg frame in
-  InReg reg
-
 (* gen *)
 let gen_int frame num =
   let dst = Frame.alloc_reg frame in
@@ -80,5 +72,12 @@ let gen_op frame op typ src1 src2 =
   match typ with
   | Types.Int  -> gen_op_int frame op src1 src2
   | Types.Byte -> gen_op_byte frame op src1 src2
+  | _ ->
+     failwith "Internal error"
+
+let gen_store typ label src =
+  match typ with
+  | Types.Int  -> [I.StoreInt (label,src)]
+  | Types.Byte -> [I.StoreByte (label,src)]
   | _ ->
      failwith "Internal error"

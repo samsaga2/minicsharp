@@ -19,6 +19,8 @@ type inst =
   | SubByte of reg * reg * reg
   | MulByte of reg * reg * reg
   | DivByte of reg * reg * reg
+  | StoreInt of Symbol.symbol * reg
+  | StoreByte of Symbol.symbol * reg
 
 let print_inst inst =
   match inst with
@@ -56,6 +58,12 @@ let print_inst inst =
      Printf.sprintf "\t%%%d = mul.b %%%d,%%%d" dst src1 src2
   | DivByte (dst,src1,src2) ->
      Printf.sprintf "\t%%%d = div.b %%%d,%%%d" dst src1 src2
+  | StoreInt (label,src) ->
+     let label = Symbol.name label in
+     Printf.sprintf "\tstore.i %s,%%%d" label src
+  | StoreByte (label,src) ->
+     let label = Symbol.name label in
+     Printf.sprintf "\tstore.b %s,%%%d" label src
 
 let print_insts insts =
   let insts = List.map print_inst insts in
