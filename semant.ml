@@ -92,10 +92,10 @@ and check_exp venv tenv frame exp pos =
 and check_varexp venv tenv frame sym pos =
   match S.get venv sym with
   | None ->
-     error ("undeclared variable: "^(Symbol.name sym)) pos;
+     Error.undeclared_variable sym pos;
      ([], T.Unit)
   | Some(E.FunEntry _) ->
-     error ("variable expected: "^(Symbol.name sym)) pos;
+     Error.variable_expected sym pos;
      ([], T.Unit)
   | Some(E.VarEntry varentry) ->
      ([], varentry.E.typ) (* TODO *)
@@ -103,10 +103,10 @@ and check_varexp venv tenv frame sym pos =
 and check_callexp venv tenv frame sym args pos =
   match S.get venv sym with
   | None ->
-     error ("undeclared function: "^(Symbol.name sym)) pos;
+     Error.undeclared_function sym pos;
      ([], T.Unit)
   | Some(E.VarEntry _) ->
-     error ("function expected: "^(Symbol.name sym)) pos;
+     Error.function_expected sym pos;
      ([], T.Unit)
   | Some(E.FunEntry funentry) ->
      List.iter2
@@ -176,7 +176,7 @@ and check_letstmt venv tenv frame name typ init pos =
 and actual_type tenv sym pos =
   match S.get tenv sym with
   | None ->
-     error ("undefined type "^(S.name sym)) pos;
+     Error.undefined_typ sym pos;
      T.Nil
   | Some(typ) ->
      match typ with
@@ -186,21 +186,16 @@ and actual_type tenv sym pos =
      | T.Int  -> T.Int
      | T.Bool -> T.Bool
 
-and error msg pos =
-  let line = Lexer.line pos
-  and col = Lexer.col pos in
-  Printf.printf "%d:%d: %s\n%!" line col msg
-
 and assert_type t1 t2 pos =
   if t1<>t2 then
-    error "types does not match" pos
+    Error.assert_type pos
 
 and assert_unique env sym pos =
   match S.get env sym with
   | None ->
      ()
   | Some _ ->
-     error ("already defined "^(S.name sym)) pos
+     Error.assert_unique sym pos
 
 and assert_number typ pos =
   match typ with
@@ -210,4 +205,4 @@ and assert_number typ pos =
   | T.Unit
   | T.Nil
   | T.Bool ->
-     error "must be a number" pos
+     Error.assert_number pos
