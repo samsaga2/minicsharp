@@ -130,7 +130,7 @@ and check_callexp venv tenv frame sym args pos =
      (reg, insts, T.Unit)
   | Some(E.FunEntry funentry) ->
      let params_insts = ref [] in
-     let params_regs = 
+     let params_regs =
        List.map2
          (fun exp decl_arg_typ ->
           let (reg,insts,typ) = check_exp venv tenv frame exp pos in
@@ -143,8 +143,11 @@ and check_callexp venv tenv frame sym args pos =
          (fun index (reg,typ) -> Tr.gen_callparam frame index reg typ)
          params_regs in
      let insts = !params_insts@(List.flatten callparams_insts) in
-     let reg = 0 in (* TODO call inst and return register *)
-     (reg, insts, funentry.E.return)
+     let (reg, call_insts) = Tr.gen_call
+                               frame
+                               funentry.E.return
+                               funentry.E.label in
+     (reg, insts@call_insts, funentry.E.return)
 
 and check_opexp venv tenv frame left op right pos =
   let (src1,linsts,left) = check_exp venv tenv frame left pos

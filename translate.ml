@@ -91,4 +91,18 @@ let gen_callparam frame index reg typ =
   | Types.Byte -> [I.CallParamByte (reg,index)]
   | _ ->
      failwith "Internal error"
-  
+
+let gen_call frame typ label =
+  match typ with
+  | Types.Unit ->
+     (0, [I.CallUnit label])
+  | _ ->
+     let dst = Frame.alloc_reg frame in
+     match typ with
+     | Types.Int ->
+        (dst, [I.CallInt (dst,label)])
+     | Types.Byte ->
+        (dst, [I.CallByte (dst,label)])
+     | _ ->
+        failwith "Internal error"
+

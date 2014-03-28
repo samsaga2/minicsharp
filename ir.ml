@@ -24,6 +24,9 @@ type inst =
   | StoreByte of Symbol.symbol * reg
   | CallParamInt of reg * int
   | CallParamByte of reg * int
+  | CallUnit of Symbol.symbol
+  | CallInt of reg * Symbol.symbol
+  | CallByte of reg * Symbol.symbol
 
 let print_inst inst =
   match inst with
@@ -73,6 +76,15 @@ let print_inst inst =
      Printf.sprintf "\tcallparam.i %%%d,%d" src index
   | CallParamByte (src,index) ->
      Printf.sprintf "\tcallparam.b %%%d,%d" src index
+  | CallUnit label ->
+     let label = Symbol.name label in
+     Printf.sprintf "\tcall %s" label
+  | CallInt (dst,label) ->
+     let label = Symbol.name label in
+     Printf.sprintf "\t%%%d = call.i %s" dst label
+  | CallByte (dst,label) ->
+     let label = Symbol.name label in
+     Printf.sprintf "\t%%%d = call.b %s" dst label
 
 let print_insts insts =
   let insts = List.map print_inst insts in

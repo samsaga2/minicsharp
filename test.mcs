@@ -8,5 +8,4 @@ int test(int i, int j) {
 
 void test2() {
      test(10, 20);
-     return;
 }
