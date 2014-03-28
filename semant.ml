@@ -90,13 +90,13 @@ and check_exp venv tenv frame exp pos =
   match exp with
   | A.NilExp (_) ->
      let (reg,insts) = Tr.gen_nil frame in
-     (reg,insts, T.Nil)
+     (reg,insts,T.Nil)
   | A.ByteExp (num,_) ->
      let (reg,insts) = Tr.gen_byte frame num in
-     (reg, insts, T.Byte)
+     (reg,insts,T.Byte)
   | A.IntExp (num,_) ->
      let (reg,insts) = Tr.gen_int frame num in
-     (reg,insts, T.Int)
+     (reg,insts,T.Int)
   | A.VarExp (sym,pos) ->
      check_varexp venv tenv frame sym pos
   | A.CallExp (sym,args,pos) ->
@@ -108,26 +108,26 @@ and check_varexp venv tenv frame sym pos =
   match S.get venv sym with
   | None ->
      Error.undeclared_variable sym pos;
-     let (reg, insts) = Tr.gen_nil frame in
-     (reg, insts, T.Byte)
+     let (reg,insts) = Tr.gen_nil frame in
+     (reg,insts,T.Byte)
   | Some(E.FunEntry _) ->
      Error.variable_expected sym pos;
-     let (reg, insts) = Tr.gen_nil frame in
-     (reg, insts, T.Byte)
+     let (reg,insts) = Tr.gen_nil frame in
+     (reg,insts,T.Byte)
   | Some(E.VarEntry var) ->
-     let (reg, insts) = Tr.gen_load_access frame var.E.typ var.E.access in
-     (reg, insts, var.E.typ)
+     let (reg,insts) = Tr.gen_load_access frame var.E.typ var.E.access in
+     (reg,insts,var.E.typ)
 
 and check_callexp venv tenv frame sym args pos =
   match S.get venv sym with
   | None ->
      Error.undeclared_function sym pos;
-     let (reg, insts) = Tr.gen_nil frame in
-     (reg, insts, T.Unit)
+     let (reg,insts) = Tr.gen_nil frame in
+     (reg,insts,T.Unit)
   | Some(E.VarEntry _) ->
      Error.function_expected sym pos;
-     let (reg, insts) = Tr.gen_nil frame in
-     (reg, insts, T.Unit)
+     let (reg,insts) = Tr.gen_nil frame in
+     (reg,insts,T.Unit)
   | Some(E.FunEntry funentry) ->
      let params_insts = ref [] in
      let params_regs =
@@ -143,11 +143,11 @@ and check_callexp venv tenv frame sym args pos =
          (fun index (reg,typ) -> Tr.gen_callparam frame index reg typ)
          params_regs in
      let insts = !params_insts@(List.flatten callparams_insts) in
-     let (reg, call_insts) = Tr.gen_call
+     let (reg,call_insts) = Tr.gen_call
                                frame
                                funentry.E.return
                                funentry.E.label in
-     (reg, insts@call_insts, funentry.E.return)
+     (reg,insts@call_insts,funentry.E.return)
 
 and check_opexp venv tenv frame left op right pos =
   let (src1,linsts,left) = check_exp venv tenv frame left pos
@@ -155,7 +155,7 @@ and check_opexp venv tenv frame left op right pos =
   assert_type left right pos;
   assert_number left pos;
   let (reg,opinsts) = Tr.gen_op frame op left src1 src2 in
-  (reg, rinsts@linsts@opinsts, left)
+  (reg,rinsts@linsts@opinsts,left)
 
 and check_stmt venv tenv frame rettyp stmt =
   match stmt with
@@ -170,7 +170,7 @@ and check_stmt venv tenv frame rettyp stmt =
      let insts = Tr.gen_ret src in
      (insts,venv,tenv)
   | A.SeqStmt (stmts,pos) ->
-     let (insts,_,_) = 
+     let (insts,_,_) =
        List.fold_left
          (fun (prev_insts,venv,tenv) stmt ->
           let (insts,venv,tenv) = check_stmt venv tenv frame rettyp stmt in
@@ -182,13 +182,15 @@ and check_stmt venv tenv frame rettyp stmt =
      let (reg,insts,cond_typ) = check_exp venv tenv frame cond pos in
      assert_type cond_typ T.Bool pos;
      ignore (check_stmt venv tenv frame rettyp then_body);
-     ([],venv,tenv) (* TODO *)
+     (* TODO phi *)
+     ([],venv,tenv) (* TODO translate *)
   | A.IfElseStmt (cond,then_body,else_body,pos) ->
      let (reg,insts,cond_typ) = check_exp venv tenv frame cond pos in
      assert_type cond_typ T.Bool pos;
      ignore (check_stmt venv tenv frame rettyp then_body);
      ignore (check_stmt venv tenv frame rettyp else_body);
-     ([],venv,tenv) (* TODO *)
+     (* TODO phi *)
+     ([],venv,tenv) (* TODO translate *)
   | A.IgnoreStmt (exp,pos) ->
      let (_,insts,exp_typ) = check_exp venv tenv frame exp pos in
      ignore exp_typ;
@@ -231,17 +233,10 @@ and assert_type t1 t2 pos =
 
 and assert_unique env sym pos =
   match S.get env sym with
-  | None ->
-     ()
-  | Some _ ->
-     Error.assert_unique sym pos
+  | None   -> ()
+  | Some _ -> Error.assert_unique sym pos
 
 and assert_number typ pos =
   match typ with
-  | T.Int
-  | T.Byte ->
-     ()
-  | T.Unit
-  | T.Nil
-  | T.Bool ->
-     Error.assert_number pos
+  | T.Int | T.Byte -> ()
+  | T.Unit | T.Nil | T.Bool -> Error.assert_number pos
