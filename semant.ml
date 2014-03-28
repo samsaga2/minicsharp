@@ -139,7 +139,8 @@ and check_opexp venv tenv frame left op right pos =
   and (src2,rinsts,right) = check_exp venv tenv frame right pos in
   assert_type left right pos;
   assert_number left pos;
-  (0,rinsts@linsts, left) (* TODO *)
+  let (reg,opinsts) = Tr.gen_op frame op left src1 src2 in
+  (reg, rinsts@linsts@opinsts, left)
 
 and check_stmt venv tenv frame rettyp stmt =
   match stmt with
@@ -178,19 +179,19 @@ and check_stmt venv tenv frame rettyp stmt =
 and check_letstmt venv tenv frame name typ init pos =
   assert_unique venv name pos;
   let typ = actual_type tenv typ pos in
-  begin
-    match init with
+  match init with
     | None ->
-       ()
+       let access = Tr.alloc_local frame in
+       let entry = E.VarEntry {E.typ=typ;access=access} in
+       let venv' = S.put venv name entry in
+       ([],venv',tenv)
     | Some(init) ->
        let (reg,insts,exp_type) = check_exp venv tenv frame init pos in
-       (* TODO *)
        assert_type typ exp_type pos;
-  end;
-  let access = Tr.alloc_local frame in
-  let entry = E.VarEntry {E.typ=typ;access=access} in
-  let venv' = S.put venv name entry in
-  ([],venv',tenv) (* TODO *)
+       let access = Tr.InReg reg in
+       let entry = E.VarEntry {E.typ=typ;access=access} in
+       let venv' = S.put venv name entry in
+       (insts,venv',tenv)
 
 and actual_type tenv sym pos =
   match S.get tenv sym with

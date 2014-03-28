@@ -55,3 +55,30 @@ let gen_load_access frame typ access =
 
 let gen_ret src =
   [I.Ret src]
+
+let gen_op_int frame op src1 src2 =
+  let dst = Frame.alloc_reg frame in
+  let insts = match op with
+    | Ast.AddOp -> [I.AddInt (dst,src1,src2)]
+    | Ast.SubOp -> [I.SubInt (dst,src1,src2)]
+    | Ast.MulOp -> [I.MulInt (dst,src1,src2)]
+    | Ast.DivOp -> [I.DivInt (dst,src1,src2)]
+  in
+  (dst, insts)
+
+let gen_op_byte frame op src1 src2 =
+  let dst = Frame.alloc_reg frame in
+  let insts = match op with
+    | Ast.AddOp -> [I.AddByte (dst,src1,src2)]
+    | Ast.SubOp -> [I.SubByte (dst,src1,src2)]
+    | Ast.MulOp -> [I.MulByte (dst,src1,src2)]
+    | Ast.DivOp -> [I.DivByte (dst,src1,src2)]
+  in
+  (dst, insts)
+
+let gen_op frame op typ src1 src2 =
+  match typ with
+  | Types.Int  -> gen_op_int frame op src1 src2
+  | Types.Byte -> gen_op_byte frame op src1 src2
+  | _ ->
+     failwith "Internal error"
