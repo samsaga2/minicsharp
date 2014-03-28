@@ -39,17 +39,18 @@ and check_fundec venv tenv name ret_typ params body pos =
               E.return=return} in
   let entry = E.FunEntry func in
 
-  let venv' = S.put venv name entry in
-
   (* make a new entry for each function param to the var env *)
+  let frame = Frame.new_frame () in
   let push_param_to_env venv (param_sym,param_typ) =
-    let typ = actual_type tenv param_typ pos in
-    let entry = E.VarEntry {E.typ=typ} in
+    let typ = actual_type tenv param_typ pos
+    and reg = Frame.alloc_reg frame in
+    let access = Tr.InReg reg in
+    let entry = E.VarEntry {E.typ=typ;access=access} in
     S.put venv param_sym entry in
+  let venv' = S.put venv name entry in
   let venv'' = List.fold_left push_param_to_env venv' params in
 
   (* check function body with the params env *)
-  let frame = Frame.new_frame () in
   let (insts,_,_) = check_stmt venv'' tenv frame func body in
   Frag.add_proc insts;
 
@@ -57,18 +58,19 @@ and check_fundec venv tenv name ret_typ params body pos =
 
 and check_vardec venv tenv name typ init pos =
   assert_unique venv name pos;
-  let typ = actual_type tenv typ pos in
+  let frame = Frame.new_frame ()
+  and typ = actual_type tenv typ pos in
   begin
     match init with
     | None ->
        ()
     | Some(init) ->
-       let frame = Frame.new_frame () in
        let (insts,exp_type) = check_exp venv tenv frame init pos in
        assert_type typ exp_type pos;
        Frag.add_var name insts
   end;
-  let entry = E.VarEntry {E.typ=typ} in
+  let access = Tr.InLabel name in
+  let entry = E.VarEntry {E.typ=typ;access=access} in
   let venv' = S.put venv name entry in
   (venv',tenv)
 
@@ -166,7 +168,9 @@ and check_letstmt venv tenv frame name typ init pos =
        (* TODO *)
        assert_type typ exp_type pos;
   end;
-  let entry = E.VarEntry {E.typ=typ} in
+  let reg = Frame.alloc_reg frame in
+  let access = Tr.InReg reg in
+  let entry = E.VarEntry {E.typ=typ;access=access} in
   let venv' = S.put venv name entry in
   ([],venv',tenv) (* TODO *)
 

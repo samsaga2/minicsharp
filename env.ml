@@ -1,4 +1,4 @@
-type varentry = {typ:Types.t}
+type varentry = {typ:Types.t; access:Translate.access}
 
 type funentry = {label: Symbol.symbol; params:Types.t list; return:Types.t}
 
