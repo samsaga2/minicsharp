@@ -155,8 +155,11 @@ and check_opexp venv tenv frame left op right pos =
   and (src2,rinsts,right) = check_exp venv tenv frame right pos in
   assert_type left right pos;
   assert_number left pos;
+  let typ = match op with
+    | A.AddOp | A.SubOp | A.MulOp | A.DivOp -> left
+    | A.EqOp -> T.Bool in
   let (reg,opinsts) = Tr.gen_op frame op left src1 src2 in
-  (reg,rinsts@linsts@opinsts,left)
+  (reg,rinsts@linsts@opinsts,typ)
 
 and check_stmt venv tenv frame rettyp stmt =
   match stmt with
