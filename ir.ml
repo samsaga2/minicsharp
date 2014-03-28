@@ -3,7 +3,6 @@ type reg = int
 type inst =
   | Nop
   | Ret
-  | Label of Symbol.symbol
   | LoadArgInt of reg * reg
   | LoadConstInt of reg * int
 
@@ -13,8 +12,6 @@ let print_inst inst =
      "\tnop"
   | Ret ->
      "\tret"
-  | Label sym ->
-     (Symbol.name sym)^":"
   | LoadArgInt (dst,src) ->
      Printf.sprintf "\t%%%d = loadarg.i %d" dst src
   | LoadConstInt (dst,num) ->

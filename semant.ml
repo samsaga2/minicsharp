@@ -34,7 +34,8 @@ and check_fundec venv tenv name ret_typ params body pos =
   let return = actual_type tenv ret_typ pos in
 
   (* make a new func entry to var environtment *)
-  let func = {E.label=Label.named_label name;
+  let label = Label.named_label name in
+  let func = {E.label=label;
               E.params=param_types;
               E.return=return} in
   let entry = E.FunEntry func in
@@ -52,7 +53,7 @@ and check_fundec venv tenv name ret_typ params body pos =
 
   (* check function body with the params env *)
   let (insts,_,_) = check_stmt venv'' tenv frame func body in
-  Frag.add_proc insts;
+  Frag.add_proc label insts;
 
   (venv',tenv)
 
@@ -207,4 +208,4 @@ and assert_number typ pos =
   | T.Int ->
      ()
   | T.Unit | T.Nil | T.Bool ->
-     error "must be a number" pos
+                      error "must be a number" pos
