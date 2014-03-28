@@ -76,6 +76,9 @@ and check_exp venv tenv frame exp pos =
   | A.NilExp (_) ->
      let insts = Tr.gen_nil frame in
      (insts, T.Nil)
+  | A.ByteExp (num,_) ->
+     let insts = Tr.gen_byte frame num in
+     (insts, T.Byte)
   | A.IntExp (num,_) ->
      let insts = Tr.gen_int frame num in
      (insts, T.Int)
@@ -179,6 +182,7 @@ and actual_type tenv sym pos =
      match typ with
      | T.Unit -> T.Unit
      | T.Nil  -> T.Nil
+     | T.Byte -> T.Byte
      | T.Int  -> T.Int
      | T.Bool -> T.Bool
 
@@ -200,7 +204,8 @@ and assert_unique env sym pos =
 
 and assert_number typ pos =
   match typ with
-  | T.Int ->
+  | T.Int
+  | T.Byte ->
      ()
   | T.Unit
   | T.Nil

@@ -41,5 +41,6 @@ rule token = parse
           | "if" { IF }
           | "else" { ELSE }
           | alpha (alpha|digit|"_")* as v { ID v }
+          | digit+ as i "b" { BYTE (int_of_string i) }
           | digit+ as i { INT (int_of_string i) }
           | _ { raise LexingError }

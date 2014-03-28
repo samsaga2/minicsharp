@@ -3,6 +3,7 @@
 %}
 
 %token <int> INT
+%token <int> BYTE
 %token <string> ID
 %token EOF PLUS MINUS MUL DIV
 %token LPAREN RPAREN COMMA SEMICOLON LBRACK RBRACK RETURN EQ
@@ -68,6 +69,8 @@ stmt:
 exp:
   | INT
        { IntExp ($1,$startpos) }
+  | BYTE
+       { ByteExp ($1,$startpos) }
   | id
        { VarExp ($1,$startpos) }
   | MINUS e=exp %prec UMINUS

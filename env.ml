@@ -1,6 +1,9 @@
-type varentry = {typ:Types.t; access:Translate.access}
+module S = Symbol
+module T = Types
 
-type funentry = {label: Symbol.symbol; params:Types.t list; return:Types.t}
+type varentry = {typ:T.t; access:Translate.access}
+
+type funentry = {label: S.symbol; params:T.t list; return:T.t}
 
 type ventry =
   | VarEntry of varentry
@@ -13,16 +16,17 @@ let make_var typ access =
   VarEntry {typ=typ; access=access}
 
 let extend_env env lst =
-  List.fold_left Symbol.put_pair env lst
+  List.fold_left S.put_pair env lst
 
 let make_env lst =
-  extend_env Symbol.empty lst
+  extend_env S.empty lst
 
 let base_tenv =
   make_env
-    [Symbol.symbol "int", Types.Int;
-     Symbol.symbol "void", Types.Unit;
-     Symbol.symbol "bool", Types.Bool]
+    [S.symbol "byte" , T.Byte;
+     S.symbol "int"  , T.Int;
+     S.symbol "void" , T.Unit;
+     S.symbol "bool" , T.Bool]
 
 let base_venv =
-  Symbol.empty
+  S.empty

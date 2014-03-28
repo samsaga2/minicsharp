@@ -1,4 +1,5 @@
 int pepe = 10;
+byte luis = 5b;
 
 int test(int i, int j) {
      int a = i + j * 2 + i;
