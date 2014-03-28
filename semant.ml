@@ -129,12 +129,22 @@ and check_callexp venv tenv frame sym args pos =
      let (reg, insts) = Tr.gen_nil frame in
      (reg, insts, T.Unit)
   | Some(E.FunEntry funentry) ->
-     List.iter2
-       (fun exp decl_arg_typ ->
-        let (reg,insts,typ) = check_exp venv tenv frame exp pos in
-        assert_type typ decl_arg_typ pos)
-       args funentry.E.params;
-     (0, [], funentry.E.return) (* TODO *)
+     let params_insts = ref [] in
+     let params_regs = 
+       List.map2
+         (fun exp decl_arg_typ ->
+          let (reg,insts,typ) = check_exp venv tenv frame exp pos in
+          assert_type typ decl_arg_typ pos;
+          params_insts := !params_insts@insts;
+          (reg,typ))
+         args funentry.E.params in
+     let callparams_insts =
+       List.mapi
+         (fun index (reg,typ) -> Tr.gen_callparam frame index reg typ)
+         params_regs in
+     let insts = !params_insts@(List.flatten callparams_insts) in
+     let reg = 0 in (* TODO call inst and return register *)
+     (reg, insts, funentry.E.return)
 
 and check_opexp venv tenv frame left op right pos =
   let (src1,linsts,left) = check_exp venv tenv frame left pos

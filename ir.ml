@@ -22,6 +22,8 @@ type inst =
   | DivByte of reg * reg * reg
   | StoreInt of Symbol.symbol * reg
   | StoreByte of Symbol.symbol * reg
+  | CallParamInt of reg * int
+  | CallParamByte of reg * int
 
 let print_inst inst =
   match inst with
@@ -67,6 +69,10 @@ let print_inst inst =
   | StoreByte (label,src) ->
      let label = Symbol.name label in
      Printf.sprintf "\tstore.b %s,%%%d" label src
+  | CallParamInt (src,index) ->
+     Printf.sprintf "\tcallparam.i %%%d,%d" src index
+  | CallParamByte (src,index) ->
+     Printf.sprintf "\tcallparam.b %%%d,%d" src index
 
 let print_insts insts =
   let insts = List.map print_inst insts in

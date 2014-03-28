@@ -84,3 +84,11 @@ let gen_store typ label src =
   | Types.Byte -> [I.StoreByte (label,src)]
   | _ ->
      failwith "Internal error"
+
+let gen_callparam frame index reg typ =
+  match typ with
+  | Types.Int  -> [I.CallParamInt (reg,index)]
+  | Types.Byte -> [I.CallParamByte (reg,index)]
+  | _ ->
+     failwith "Internal error"
+  
