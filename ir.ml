@@ -3,8 +3,8 @@ type reg = int
 type inst =
   | Nop
   | Ret
-  | LoadArgInt of reg * reg
-  | LoadArgByte of reg * reg
+  | LoadArgInt of reg * int
+  | LoadArgByte of reg * int
   | LoadConstInt of reg * int
   | LoadConstByte of reg * int
 

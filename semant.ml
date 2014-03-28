@@ -40,18 +40,29 @@ and check_fundec venv tenv name ret_typ params body pos =
 
   (* make a new entry for each function param to the var env *)
   let frame = Frame.new_frame () in
-  let push_param_to_env venv (param_sym,param_typ) =
-    let typ = actual_type tenv param_typ pos in
-    let access = Tr.alloc_local frame in
-    let entry = E.make_var typ access in
-    S.put venv param_sym entry in
-  let venv'' = List.fold_left push_param_to_env venv' params in
+  let (venv'',arg_insts) = check_funcargs venv' tenv frame params pos in
 
   (* check function body with the params env *)
   let (insts,_,_) = check_stmt venv'' tenv frame return body in
-  Frag.add_proc label insts;
+  Frag.add_proc label (arg_insts@insts);
 
   (venv',tenv)
+
+and check_funcargs venv tenv frame params pos =
+  let index = ref 0 and insts = ref [] in
+  let push_param_to_env venv (param_sym,param_typ) =
+    (* arg actual type *)
+    let typ = actual_type tenv param_typ pos in
+    (* load arg insts *)
+    let arg_insts = Tr.gen_funcarg frame typ !index in
+    insts := !insts@arg_insts;
+    incr index;
+    (* push arg to venv *)
+    let access = Tr.alloc_local frame in
+    let entry = E.make_var typ access in
+    S.put venv param_sym entry in
+  let venv' = List.fold_left push_param_to_env venv params in
+  (venv',!insts)
 
 and check_vardec venv tenv name typ init pos =
   assert_unique venv name pos;
