@@ -202,5 +202,7 @@ and assert_number typ pos =
   match typ with
   | T.Int ->
      ()
-  | T.Unit | T.Nil | T.Bool ->
-                      error "must be a number" pos
+  | T.Unit
+  | T.Nil
+  | T.Bool ->
+     error "must be a number" pos
