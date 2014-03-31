@@ -42,25 +42,24 @@ and check_fundec venv tenv name ret_typ params body pos =
 
   (* make a new entry for each function param to the var env *)
   let frame = Frame.new_frame () in
-  let (venv'',arg_insts) = check_funcargs venv' tenv frame params pos in
+  let (venv'',param_insts) = check_funcparams venv' tenv frame params pos in
 
   (* check function body with the params env *)
   let (insts,_,_) = check_stmt venv'' tenv frame return body in
-  let ret_insts = Tr.gen_retunit () in
-  Frag.add_proc label (arg_insts@insts@ret_insts);
+  Frag.add_proc label (param_insts@insts);
 
   (venv',tenv)
 
-and check_funcargs venv tenv frame params pos =
+and check_funcparams venv tenv frame params pos =
   let index = ref 0 and insts = ref [] in
   let push_param_to_env venv (param_sym,param_typ) =
-    (* arg actual type *)
+    (* param actual type *)
     let typ = actual_type tenv param_typ pos in
-    (* load arg insts *)
-    let (reg,arg_insts) = Tr.gen_funcarg frame typ !index in
-    insts := !insts@arg_insts;
+    (* load param insts *)
+    let (reg,param_insts) = Tr.gen_funcparam frame typ !index in
+    insts := !insts@param_insts;
     incr index;
-    (* push arg to venv *)
+    (* push param to venv *)
     let access = Tr.InReg reg in
     let entry = E.make_var typ access in
     S.put venv param_sym entry in
@@ -100,8 +99,8 @@ and check_exp venv tenv frame exp pos =
      (reg,insts,T.Int)
   | A.VarExp (sym,pos) ->
      check_varexp venv tenv frame sym pos
-  | A.CallExp (sym,args,pos) ->
-     check_callexp venv tenv frame sym args pos
+  | A.CallExp (sym,params,pos) ->
+     check_callexp venv tenv frame sym params pos
   | A.OpExp (left,op,right,pos) ->
      check_opexp venv tenv frame left op right pos
 
@@ -119,7 +118,7 @@ and check_varexp venv tenv frame sym pos =
      let (reg,insts) = Tr.gen_load_access frame var.E.typ var.E.access in
      (reg,insts,var.E.typ)
 
-and check_callexp venv tenv frame sym args pos =
+and check_callexp venv tenv frame sym params pos =
   match S.get venv sym with
   | None ->
      Error.undeclared_function sym pos;
@@ -133,12 +132,12 @@ and check_callexp venv tenv frame sym args pos =
      let params_insts = ref [] in
      let params_regs =
        List.map2
-         (fun exp decl_arg_typ ->
+         (fun exp decl_param_typ ->
           let (reg,insts,typ) = check_exp venv tenv frame exp pos in
-          assert_type typ decl_arg_typ pos;
+          assert_type typ decl_param_typ pos;
           params_insts := !params_insts@insts;
           (reg,typ))
-         args funentry.E.params in
+         params funentry.E.params in
      let callparams_insts =
        List.mapi
          (fun index (reg,typ) -> Tr.gen_callparam frame index reg typ)

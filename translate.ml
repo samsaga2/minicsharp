@@ -7,22 +7,22 @@ type access =
 (* gen *)
 let gen_int frame num =
   let dst = Frame.alloc_reg frame in
-  (dst, [I.LoadConstInt (dst,num)])
+  (dst, [I.ConstInt (dst,num)])
 
 let gen_byte frame num =
   let dst = Frame.alloc_reg frame in
-  (dst, [I.LoadConstByte (dst,num)])
+  (dst, [I.ConstByte (dst,num)])
 
 let gen_nil frame =
   gen_byte frame 0
 
-let gen_funcarg frame typ index =
+let gen_funcparam frame typ index =
   let dst = Frame.alloc_reg frame in
   let inst = match typ with
     | Types.Int ->
-       [I.LoadArgInt (dst,index)]
+       [I.LoadParamInt (dst,index)]
     | Types.Byte ->
-       [I.LoadArgByte (dst,index)]
+       [I.LoadParamByte (dst,index)]
     | _ ->
        failwith "Internal error" in
   (dst, inst)

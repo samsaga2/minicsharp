@@ -23,10 +23,12 @@ let print_frag = function
   | Var (label, insts) ->
      let comm = ("\t;; initialization of global var "^(Symbol.name label)) in
      print_endline comm;
-     print_insts insts
+     print_insts insts;
+     print_newline ()
   | Proc (label,insts) ->
      Printf.printf "%s:\n" (Symbol.name label);
-     print_insts insts
+     print_insts insts;
+     print_newline ()
 
 let print_frags () =
   List.iter print_frag !frags
