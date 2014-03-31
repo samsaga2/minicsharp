@@ -184,19 +184,21 @@ and check_stmt venv tenv frame rettyp stmt =
          ([],venv,tenv)
          stmts in
      (insts,venv,tenv)
-  | A.IfStmt (cond,then_body,pos) ->
-     let (reg,insts,cond_typ) = check_exp venv tenv frame cond pos in
-     assert_type cond_typ T.Bool pos;
-     ignore (check_stmt venv tenv frame rettyp then_body);
+  | A.IfStmt (cond,thenbody,pos) ->
+     let (condreg,condinsts,condtyp) = check_exp venv tenv frame cond pos in
+     assert_type condtyp T.Bool pos;
+     let (theninsts,venv',tenv') = check_stmt venv tenv frame rettyp thenbody in
+     let insts = Tr.gen_ifthen frame condreg theninsts in
      (* TODO phi *)
-     ([],venv,tenv) (* TODO translate *)
+     (insts,venv,tenv)
   | A.IfElseStmt (cond,then_body,else_body,pos) ->
-     let (reg,insts,cond_typ) = check_exp venv tenv frame cond pos in
-     assert_type cond_typ T.Bool pos;
-     ignore (check_stmt venv tenv frame rettyp then_body);
-     ignore (check_stmt venv tenv frame rettyp else_body);
+     let (condreg,condinsts,condtyp) = check_exp venv tenv frame cond pos in
+     assert_type condtyp T.Bool pos;
+     let (theninsts,_,_) =  check_stmt venv tenv frame rettyp then_body
+     and (elseinsts,_,_) =  check_stmt venv tenv frame rettyp else_body in
+     let insts = Tr.gen_ifthenelse frame condreg theninsts elseinsts in
      (* TODO phi *)
-     ([],venv,tenv) (* TODO translate *)
+     (insts,venv,tenv)
   | A.IgnoreStmt (exp,pos) ->
      let (_,insts,exp_typ) = check_exp venv tenv frame exp pos in
      ignore exp_typ;

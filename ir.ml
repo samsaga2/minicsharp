@@ -36,6 +36,9 @@ type inst =
   | CallInt of reg * Symbol.symbol
   | CallByte of reg * Symbol.symbol
   | CallBool of reg * Symbol.symbol
+  | Label of Symbol.symbol
+  | Jump of Symbol.symbol
+  | JumpFalse of reg * Symbol.symbol
 
 let print_inst inst =
   match inst with
@@ -116,6 +119,15 @@ let print_inst inst =
   | CallBool (dst,label) ->
      let label = Symbol.name label in
      Printf.sprintf "\t%%%d = call.t %s" dst label
+  | Label label ->
+     let label = Symbol.name label in
+     label^":"
+  | Jump label ->
+     let label = Symbol.name label in
+     Printf.sprintf "\tjump %s" label
+  | JumpFalse (reg,label) ->
+     let label = Symbol.name label in
+     Printf.sprintf "\tjumpfalse %%%d,%s" reg label
 
 let print_insts insts =
   let insts = List.map print_inst insts in

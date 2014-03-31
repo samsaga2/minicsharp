@@ -117,3 +117,17 @@ let gen_call frame typ label =
      | _ ->
         failwith "Internal error"
 
+let gen_ifthen frame condreg theninsts =
+  let endlbl = Label.new_label () in
+  [I.JumpFalse (condreg,endlbl)]
+  @theninsts
+  @[I.Label endlbl]
+
+let gen_ifthenelse frame condreg theninsts elseinsts =
+  let elselbl = Label.new_label ()
+  and endlbl = Label.new_label () in
+  [I.JumpFalse (condreg,elselbl)]
+  @theninsts
+  @[I.Jump endlbl]
+  @elseinsts
+  @[I.Label endlbl]
