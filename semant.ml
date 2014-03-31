@@ -97,6 +97,9 @@ and check_exp venv tenv frame exp pos =
   | A.IntExp (num,_) ->
      let (reg,insts) = Tr.gen_int frame num in
      (reg,insts,T.Int)
+  | A.BoolExp (b,_) ->
+     let (reg,insts) = Tr.gen_bool frame b in
+     (reg,insts,T.Bool)
   | A.VarExp (sym,pos) ->
      check_varexp venv tenv frame sym pos
   | A.CallExp (sym,params,pos) ->

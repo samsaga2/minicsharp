@@ -18,6 +18,7 @@ type prog = decl list
    | NilExp of pos
    | IntExp of int * pos
    | ByteExp of int * pos
+   | BoolExp of bool * pos
    | VarExp of symbol * pos
    | CallExp of symbol * exp list * pos
    | OpExp of exp * op * exp * pos

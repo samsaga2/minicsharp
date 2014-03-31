@@ -9,6 +9,7 @@
 %token LPAREN RPAREN COMMA SEMICOLON LBRACK RBRACK RETURN
 %token EQ DEQ
 %token IF ELSE
+%token TRUE FALSE
 
 %nonassoc IFX
 %nonassoc ELSE
@@ -73,6 +74,10 @@ exp:
        { IntExp ($1,$startpos) }
   | BYTE
        { ByteExp ($1,$startpos) }
+  | TRUE
+       { BoolExp (true,$startpos) }
+  | FALSE
+       { BoolExp (false,$startpos) }
   | id
        { VarExp ($1,$startpos) }
   | MINUS e=exp %prec UMINUS

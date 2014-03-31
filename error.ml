@@ -26,4 +26,3 @@ let assert_unique sym pos =
 
 let assert_number pos =
   error "must be a number" pos
-  

@@ -13,6 +13,10 @@ let gen_byte frame num =
   let dst = Frame.alloc_reg frame in
   (dst, [I.ConstByte (dst,num)])
 
+let gen_bool frame b =
+  let dst = Frame.alloc_reg frame in
+  (dst, [I.ConstBool (dst,b)])
+
 let gen_nil frame =
   gen_byte frame 0
 
@@ -23,6 +27,8 @@ let gen_funcparam frame typ index =
        [I.LoadParamInt (dst,index)]
     | Types.Byte ->
        [I.LoadParamByte (dst,index)]
+    | Types.Bool ->
+       [I.LoadParamBool (dst,index)]
     | _ ->
        failwith "Internal error" in
   (dst, inst)
@@ -34,6 +40,8 @@ let gen_load_label frame label typ =
        [I.LoadInt (dst,label)]
     | Types.Byte ->
        [I.LoadByte (dst,label)]
+    | Types.Bool ->
+       [I.LoadBool (dst,label)]
     | _ ->
        failwith "Internal error" in
   (dst, inst)
@@ -82,15 +90,17 @@ let gen_op frame op typ src1 src2 =
 
 let gen_store typ label src =
   match typ with
-  | Types.Int  -> [I.StoreInt (label,src)]
+  | Types.Int  -> [I.StoreInt  (label,src)]
   | Types.Byte -> [I.StoreByte (label,src)]
+  | Types.Bool -> [I.StoreBool (label,src)]
   | _ ->
      failwith "Internal error"
 
 let gen_callparam frame index reg typ =
   match typ with
-  | Types.Int  -> [I.CallParamInt (reg,index)]
+  | Types.Int  -> [I.CallParamInt  (reg,index)]
   | Types.Byte -> [I.CallParamByte (reg,index)]
+  | Types.Bool -> [I.CallParamBool (reg,index)]
   | _ ->
      failwith "Internal error"
 
@@ -101,10 +111,9 @@ let gen_call frame typ label =
   | _ ->
      let dst = Frame.alloc_reg frame in
      match typ with
-     | Types.Int ->
-        (dst, [I.CallInt (dst,label)])
-     | Types.Byte ->
-        (dst, [I.CallByte (dst,label)])
+     | Types.Int  -> (dst, [I.CallInt (dst,label)])
+     | Types.Byte -> (dst, [I.CallByte (dst,label)])
+     | Types.Bool -> (dst, [I.CallBool (dst,label)])
      | _ ->
         failwith "Internal error"
 

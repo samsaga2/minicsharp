@@ -41,6 +41,8 @@ rule token = parse
           | "return" { RETURN }
           | "if" { IF }
           | "else" { ELSE }
+          | "true" { TRUE }
+          | "false" { FALSE }
           | alpha (alpha|digit|"_")* as v { ID v }
           | digit+ as i "b" { BYTE (int_of_string i) }
           | digit+ as i { INT (int_of_string i) }

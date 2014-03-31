@@ -2,11 +2,14 @@ int pepe = 10;
 byte luis = 5b;
 
 int test(int i, int j) {
-     int a = i + j * 2 + i;
-     return a;
+  int a = i + j * 2 + i;
+  return a;
 }
 
 void test2() {
-     bool b = 1 == 2;
-     test(10, 20);
+  bool b = 1 == 2;
+  test(10, 20);
+  if(b) {
+    test2();
+  }
 }
