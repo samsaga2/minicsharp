@@ -1,30 +1,39 @@
 module I = Ir
 module T = Types
 module S = Symbol
-module F = Frame
 
 type access =
   | InLabel of S.symbol
   | InReg of I.reg
 
+type frame = {mutable num_regs:int}
+
+let new_frame () =
+  {num_regs=0}
+
+let alloc_reg frame : Ir.reg =
+  let reg = frame.num_regs in
+  frame.num_regs <- frame.num_regs + 1;
+  reg
+
 (* gen *)
 let gen_int frame num =
-  let dst = F.alloc_reg frame in
+  let dst = alloc_reg frame in
   (dst, [I.ConstInt (dst,num)])
 
 let gen_byte frame num =
-  let dst = F.alloc_reg frame in
+  let dst = alloc_reg frame in
   (dst, [I.ConstByte (dst,num)])
 
 let gen_bool frame b =
-  let dst = F.alloc_reg frame in
+  let dst = alloc_reg frame in
   (dst, [I.ConstBool (dst,b)])
 
 let gen_nil frame =
   gen_byte frame 0
 
 let gen_funcparam frame typ index =
-  let dst = F.alloc_reg frame in
+  let dst = alloc_reg frame in
   let inst = match typ with
     | T.Int ->
        [I.LoadParamInt (dst,index)]
@@ -37,7 +46,7 @@ let gen_funcparam frame typ index =
   (dst, inst)
 
 let gen_load_label frame label typ =
-  let dst = F.alloc_reg frame in
+  let dst = alloc_reg frame in
   let inst = match typ with
     | T.Int ->
        [I.LoadInt (dst,label)]
@@ -63,7 +72,7 @@ let gen_ret src =
   [I.Ret src]
 
 let gen_op_int frame op src1 src2 =
-  let dst = F.alloc_reg frame in
+  let dst = alloc_reg frame in
   let insts = match op with
     | Ast.AddOp -> [I.AddInt (dst,src1,src2)]
     | Ast.SubOp -> [I.SubInt (dst,src1,src2)]
@@ -74,7 +83,7 @@ let gen_op_int frame op src1 src2 =
   (dst, insts)
 
 let gen_op_byte frame op src1 src2 =
-  let dst = F.alloc_reg frame in
+  let dst = alloc_reg frame in
   let insts = match op with
     | Ast.AddOp -> [I.AddByte (dst,src1,src2)]
     | Ast.SubOp -> [I.SubByte (dst,src1,src2)]
@@ -112,7 +121,7 @@ let gen_call frame typ label =
   | T.Unit ->
      (0, [I.CallUnit label])
   | _ ->
-     let dst = F.alloc_reg frame in
+     let dst = alloc_reg frame in
      match typ with
      | T.Int  -> (dst, [I.CallInt (dst,label)])
      | T.Byte -> (dst, [I.CallByte (dst,label)])

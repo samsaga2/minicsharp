@@ -41,7 +41,7 @@ and check_fundec venv tenv name ret_typ params body pos =
   let venv' = S.put venv name func in
 
   (* make a new entry for each function param to the var env *)
-  let frame = Frame.new_frame () in
+  let frame = Tr.new_frame () in
   let (venv'',param_insts) = check_funcparams venv' tenv frame params pos in
 
   (* check function body with the params env *)
@@ -68,7 +68,7 @@ and check_funcparams venv tenv frame params pos =
 
 and check_vardec venv tenv name typ init pos =
   assert_unique venv name pos;
-  let frame = Frame.new_frame ()
+  let frame = Tr.new_frame ()
   and typ = actual_type tenv typ pos
   and label = Label.named_label name in
   begin
@@ -209,7 +209,7 @@ and check_letstmt venv tenv frame name typ init pos =
   let typ = actual_type tenv typ pos in
   match init with
     | None ->
-       let reg = Frame.alloc_reg frame in
+       let reg = Tr.alloc_reg frame in
        let access = Tr.InReg reg in
        let entry = E.VarEntry {E.typ=typ;access=access} in
        let venv' = S.put venv name entry in
