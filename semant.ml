@@ -211,14 +211,14 @@ and check_letstmt venv tenv frame name typ init pos =
     | None ->
        let reg = Tr.alloc_reg frame in
        let access = Tr.InReg reg in
-       let entry = E.VarEntry {E.typ=typ;access=access} in
+       let entry = E.make_var typ access in
        let venv' = S.put venv name entry in
        ([],venv',tenv)
     | Some(init) ->
        let (reg,insts,exp_type) = check_exp venv tenv frame init pos in
        assert_type typ exp_type pos;
        let access = Tr.InReg reg in
-       let entry = E.VarEntry {E.typ=typ;access=access} in
+       let entry = E.make_var typ access in
        let venv' = S.put venv name entry in
        (insts,venv',tenv)
 
