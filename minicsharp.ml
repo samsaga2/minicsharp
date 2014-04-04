@@ -1,3 +1,6 @@
+open Z80machine
+open Machine
+
 let print_syntax_error lexbuf =
   let pos = Lexing.lexeme_start_p lexbuf in
   let lnum = pos.Lexing.pos_lnum
@@ -9,7 +12,8 @@ let compile in_buffer =
   try
     let prog = Parser.program Lexer.token lexbuf in
     Semant.check prog;
-    Frag.print_frags ()
+    let asm = Z80Machine.asm () in
+    print_endline (Asm.print_insts asm)
   with
   | Lexer.LexingError ->
      print_syntax_error lexbuf

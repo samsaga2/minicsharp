@@ -40,8 +40,7 @@ type inst =
   | Jump of Symbol.symbol
   | JumpFalse of reg * Symbol.symbol
 
-let print_inst inst =
-  match inst with
+let print_inst = function
   | Nop ->
      "\tnop"
   | RetUnit ->

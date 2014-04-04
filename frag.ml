@@ -1,6 +1,6 @@
 type frag = 
-  | Var of Label.label * Ir.inst list
-  | Proc of Label.label * Ir.inst list
+  | Var of  Symbol.symbol * Ir.inst list
+  | Proc of Symbol.symbol * Ir.inst list
 
 let frags = ref []
 
@@ -14,6 +14,15 @@ let add_var label insts =
 let add_proc label insts =
   let frag = Proc (label,insts) in
   add_frag frag
+
+(* util *)
+let is_var = function
+  | Var _ -> true
+  | _     -> false
+
+let is_proc = function
+  | Proc _ -> true
+  | _      -> false
 
 (* pretty print *)
 let print_insts insts =
