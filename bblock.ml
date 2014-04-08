@@ -1,5 +1,3 @@
-open Batteries
-
 let split insts =
   let rec blocks insts blist =
     match insts with
