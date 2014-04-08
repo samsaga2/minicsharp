@@ -30,14 +30,14 @@ let rec print_inst = function
 
 and print_oper = function
   | {opcode=opcode; dst=dst; src1=src1; src2=src2; label=label; num=num} ->
-     let int_opt_to_string n = Option.map_default string_of_int "" n
-     and reg_opt_to_string n = Option.map_default (fun n -> "%"^(string_of_int n)) "" n
-     and str_opt_to_string n = Option.map_default Symbol.name "" n in
-     let dst	= reg_opt_to_string dst
-     and src1	= reg_opt_to_string src1
-     and src2	= reg_opt_to_string src2
-     and label	= str_opt_to_string label
-     and num	= int_opt_to_string num in
+     let string_from_opt_int n = Option.map_default string_of_int "" n
+     and string_from_opt_reg n = Option.map_default (fun n -> "%"^(string_of_int n)) "" n
+     and string_from_opt_str n = Option.map_default Symbol.name "" n in
+     let dst	= string_from_opt_reg dst
+     and src1	= string_from_opt_reg src1
+     and src2	= string_from_opt_reg src2
+     and label	= string_from_opt_str label
+     and num	= string_from_opt_int num in
      let replaces = ["DST", dst;
 		     "SRC1", src1; "SRC2", src2;
 		     "LABEL", label; "NUM", num] in
