@@ -32,7 +32,16 @@ module Z80Machine : Machine = struct
     | _ -> failwith "internal error"
 
   and asm_insts insts =
-    let bblocks = Bblock.split insts in
+    let (bblocks,done_label) = Bblock.split insts in
+
+(* TEST
+    let bblocks = List.map Ir.print_insts bblocks in
+    let bblocks = String.concat "\n;; BLOCKS\n" bblocks in
+    print_endline "---";
+    print_endline bblocks;
+    print_endline "---";
+*)
+
     (* TODO liveness *)
     (* TODO register allocator *)
     (* TODO asm_inst with allocated regs *)
