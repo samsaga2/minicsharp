@@ -32,6 +32,10 @@ module Z80Machine : Machine = struct
     | _ -> failwith "internal error"
 
   and asm_insts insts =
+    let bblocks = Bblock.split insts in
+    (* TODO liveness *)
+    (* TODO register allocator *)
+    (* TODO asm_inst with allocated regs *)
     List.flatten (List.map asm_inst insts)
 
   and asm_inst = function

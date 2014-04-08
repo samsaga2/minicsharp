@@ -45,8 +45,6 @@ and print_oper = function
        (fun str (sfrom,sto) ->
         String.nreplace str sfrom sto)
        opcode replaces
-  | _ ->
-     failwith "internal error"
 
 let print_insts insts =
   let insts = List.map print_inst insts in
