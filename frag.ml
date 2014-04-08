@@ -1,6 +1,6 @@
 type frag = 
-  | Var of  Symbol.symbol * Ir.inst list
-  | Proc of Symbol.symbol * Ir.inst list
+  | Var of  Symbol.symbol * Ir.t list
+  | Proc of Symbol.symbol * Ir.t list
 
 let frags = ref []
 

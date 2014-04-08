@@ -2,7 +2,7 @@ open Batteries
 
 type reg = int
 
-type inst =
+type t =
   | Nop
   | RetUnit
   | Ret of reg
