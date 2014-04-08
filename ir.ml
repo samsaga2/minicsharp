@@ -12,9 +12,9 @@ type t =
   | ConstInt of reg * int
   | ConstByte of reg * int
   | ConstBool of reg * bool
-  | LoadInt of reg * Symbol.symbol
-  | LoadByte of reg * Symbol.symbol
-  | LoadBool of reg * Symbol.symbol
+  | LoadInt of reg * Symbol.t
+  | LoadByte of reg * Symbol.t
+  | LoadBool of reg * Symbol.t
   | AddInt of reg * reg * reg
   | SubInt of reg * reg * reg
   | MulInt of reg * reg * reg
@@ -26,19 +26,19 @@ type t =
   | SubByte of reg * reg * reg
   | MulByte of reg * reg * reg
   | DivByte of reg * reg * reg
-  | StoreInt of Symbol.symbol * reg
-  | StoreByte of Symbol.symbol * reg
-  | StoreBool of Symbol.symbol * reg
+  | StoreInt of Symbol.t * reg
+  | StoreByte of Symbol.t * reg
+  | StoreBool of Symbol.t * reg
   | CallParamInt of reg * int
   | CallParamByte of reg * int
   | CallParamBool of reg * int
-  | CallUnit of Symbol.symbol
-  | CallInt of reg * Symbol.symbol
-  | CallByte of reg * Symbol.symbol
-  | CallBool of reg * Symbol.symbol
-  | Label of Symbol.symbol
-  | Jump of Symbol.symbol
-  | JumpFalse of reg * Symbol.symbol
+  | CallUnit of Symbol.t
+  | CallInt of reg * Symbol.t
+  | CallByte of reg * Symbol.t
+  | CallBool of reg * Symbol.t
+  | Label of Symbol.t
+  | Jump of Symbol.t
+  | JumpFalse of reg * Symbol.t
 
 let print_inst = function
   | Nop ->

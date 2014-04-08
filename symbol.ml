@@ -1,4 +1,4 @@
-type symbol = string * int
+type t = string * int
 
 let nextsym = ref 0
 let hashtable : (string, int) Hashtbl.t = Hashtbl.create 64

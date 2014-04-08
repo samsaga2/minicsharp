@@ -3,7 +3,7 @@ module T = Types
 module S = Symbol
 
 type access =
-  | InLabel of S.symbol
+  | InLabel of S.t
   | InReg of I.reg
 
 type frame = {mutable num_regs:int}
@@ -11,7 +11,7 @@ type frame = {mutable num_regs:int}
 let new_frame () =
   {num_regs=0}
 
-let alloc_reg frame : Ir.reg =
+let alloc_reg frame =
   let reg = frame.num_regs in
   frame.num_regs <- frame.num_regs + 1;
   reg

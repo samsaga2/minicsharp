@@ -1,10 +1,10 @@
 type frag = 
-  | Var of  Symbol.symbol * Ir.t list
-  | Proc of Symbol.symbol * Ir.t list
+  | Var of  Symbol.t * Ir.t list
+  | Proc of Symbol.t * Ir.t list
 
 let frags = ref []
 
-let add_frag (f:frag) =
+let add_frag f =
   frags := f::!frags
 
 let add_var label insts =

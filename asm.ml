@@ -1,16 +1,16 @@
 open Batteries
 
-type oper = {opcode: string;
-             dst: Ir.reg option;
-             src1: Ir.reg option;
-	     src2: Ir.reg option;
-             label: Symbol.symbol option;
-             num: int option}
+type t = {opcode: string;
+          dst: Ir.reg option;
+          src1: Ir.reg option;
+	  src2: Ir.reg option;
+          label: Symbol.t option;
+          num: int option}
 
 type instr =
-  | Oper of oper
-  | Label of Symbol.symbol
-  | Move of oper
+  | Oper of t
+  | Label of Symbol.t
+  | Move of t
 
 let gen_oper opcode ?dst ?src1 ?src2 ?label ?num () =
   Oper {opcode="\t"^opcode; dst=dst; src1=src1; src2=src2; label=label; num=num}

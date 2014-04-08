@@ -3,7 +3,7 @@ module T = Types
 
 type varentry = {typ:T.t; access:Translate.access}
 
-type funentry = {label: S.symbol; params:T.t list; return:T.t}
+type funentry = {label: S.t; params:T.t list; return:T.t}
 
 type ventry =
   | VarEntry of varentry

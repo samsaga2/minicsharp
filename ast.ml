@@ -1,5 +1,5 @@
-type symbol = Symbol.symbol
-type typeid = Symbol.symbol
+type symbol = Symbol.t
+type typeid = Symbol.t
 type pos = Lexing.position
 
 type prog = decl list
