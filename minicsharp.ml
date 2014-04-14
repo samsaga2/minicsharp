@@ -17,7 +17,8 @@ let compile in_buffer =
       let prog = Parser.program Lexer.token lexbuf in
       Semant.check prog;
       let asm = Z80Machine.asm () in
-      print_endline (Asm.print_insts asm)
+      ()
+      (* print_endline (Asm.print_insts asm) *)
     with
     | Parser.Error ->
        print_syntax_error (Some lexbuf)

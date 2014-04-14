@@ -32,7 +32,7 @@ module Z80Machine : Machine = struct
     | _ -> failwith "internal error"
 
   and asm_insts insts =
-    let (bblocks,done_label) = Bblock.split insts in
+    let bblocks = Bblock.make insts in
 
 (* TEST
     let bblocks = List.map Ir.print_insts bblocks in

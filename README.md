@@ -1,9 +1,13 @@
 Compilation
 ===========
 
-opam install menhir
-opam install batteries
-make
+It needs:
+- ocaml >= 4
+- menhir (opam install menhir)
+- batteries (opam install batteries)
+
+Usage:
+- make
 
 Passes
 ======
